@@ -1,0 +1,38 @@
+{
+    "manifest_version": 3,
+    "name": "REBUSS.AzureDevOps.PR",
+    "version": "0.01",
+    "description": "Extension for AzureDevOps PR.",
+    "permissions": [
+      "activeTab",
+      "scripting",
+      "storage",
+      "identity",
+      "tabs"
+    ],
+    "host_permissions": [
+      "https://dev.azure.com/*",
+      "https://localhost:5122/*"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://dev.azure.com/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "action": {
+      "default_popup": "popup/popup.html",
+      "default_icon": {
+        "16": "icons/icon-16.png",
+        "32": "icons/icon-32.png",
+        "48": "icons/icon-48.png",
+        "128": "icons/icon-128.png",
+        "256": "icons/icon-256.png"
+      }
+    },
+    "options_page": "options.html"
+  }
+  

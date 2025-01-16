@@ -1,0 +1,6 @@
+@AzureDevOpsPullRequestAPI_HostAddress = http://localhost:5122
+
+GET {{AzureDevOpsPullRequestAPI_HostAddress}}/PullRequest/GetPullRequestDiff?pullRequestId=12345
+Accept: application/json
+
+###

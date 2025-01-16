@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureDevOpsPullRequestAPI", "AzureDevOpsPullRequestAPI.csproj", "{331EABD9-5BAB-4FD5-9D1D-26AA414A6F89}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{331EABD9-5BAB-4FD5-9D1D-26AA414A6F89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{331EABD9-5BAB-4FD5-9D1D-26AA414A6F89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{331EABD9-5BAB-4FD5-9D1D-26AA414A6F89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{331EABD9-5BAB-4FD5-9D1D-26AA414A6F89}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

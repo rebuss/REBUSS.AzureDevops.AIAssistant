@@ -3,3 +3,4 @@ bin/
 obj/
 *.crx
 *.pem
+REBUSS.AzureDevops.PullResuestService/appsettings.Local.json

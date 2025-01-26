@@ -1,0 +1,13 @@
+﻿Please conduct a detailed and professional code review basing of the attached diff file. Approach this as a senior .NET developer and software architect. Focus on identifying:
+
+Code errors or potential bugs.
+Violations of best practices or architectural principles.
+Opportunities for optimization or refactoring.
+Any potential security concerns.
+For each issue, provide:
+
+A clear explanation of the problem.
+References to specific line of code.
+Suggestions for improved or corrected code where applicable.
+
+The goal is to ensure the code meets the highest standards of quality, maintainability, and performance.

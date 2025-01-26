@@ -1,11 +1,8 @@
-﻿using LibGit2Sharp;
+﻿using AzureDevOpsPullRequestAPI;
+using AzureDevOpsPullRequestAPI.Agents;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.TeamFoundation.SourceControl.WebApi;
-using Microsoft.VisualStudio.Services.Common;
-using Microsoft.VisualStudio.Services.WebApi;
-using REBUSS.AzureDevOpsPullRequestAPI.Services;
-using System.Diagnostics;
-using System.Text;
+using REBUSS.AzureDevOps.PullRequestAPI.Agents.Copilot;
+using REBUSS.AzureDevOps.PullRequestAPI.Services;
 
 namespace REBUSS.AzureDevOpsPullRequestAPI.Controllers
 {
@@ -14,10 +11,14 @@ namespace REBUSS.AzureDevOpsPullRequestAPI.Controllers
     public class PullRequestController : Controller
     {
         private readonly GitService gitService;
+        private readonly string diffFilesDirectory;
+        private readonly InterfaceAI aiAgent;
 
         public PullRequestController(IConfiguration config)
         {
             gitService = new GitService(config);
+            aiAgent = new BrowserCopilot(config);
+            diffFilesDirectory = config[ConfigConsts.DiffFilesDirectory] ?? throw new ArgumentNullException(nameof(diffFilesDirectory));
         }
 
         public IActionResult Index()
@@ -33,24 +34,97 @@ namespace REBUSS.AzureDevOpsPullRequestAPI.Controllers
         }
 
         [HttpGet("Summarize")]
-        public IActionResult Summarize(int id)
+        public async Task<IActionResult> Summarize(int id)
         {
-            // Implementation goes here
+            var diffFile = GetLatestReviewFile(id);
+            string diffContent = string.Empty;
+            if (string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile))
+            {
+                diffContent = await gitService.GetPullRequestDiffContent(id);
+                string fileName = Path.Combine(diffFilesDirectory, $"{id}_Review_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
+                await System.IO.File.WriteAllTextAsync(fileName, diffContent);
+            }
+
+            var prompt = System.IO.File.ReadAllText("Prompts/SummarizePullRequest.txt");
+            var result = await aiAgent.AskAgent(prompt, diffFile);
+
             return View();
         }
 
         [HttpGet("Review")]
-        public IActionResult Review(int id)
+        public async Task<IActionResult> Review(int id)
         {
-            // Implementation goes here
+            var diffFile = GetLatestReviewFile(id);
+            string diffContent = string.Empty;
+            if (string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile))
+            {
+                diffContent = await gitService.GetPullRequestDiffContent(id);
+                string fileName = Path.Combine(diffFilesDirectory, $"{id}_Review_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
+                await System.IO.File.WriteAllTextAsync(fileName, diffContent);
+            }
+            var prompt = System.IO.File.ReadAllText("Prompts/PullRequestReview.txt");
+            var result = await aiAgent.AskAgent(prompt, diffFile);
+
             return View();
         }
 
-        [HttpGet("ReviewAndApplyOnAzure")]
-        public IActionResult ReviewAndApplyOnAzure(int id)
+        public async Task<IActionResult> ReviewSingleFile(int id, string fileName)
         {
-            // Implementation goes here
+            var diffFile = GetLatestReviewFile(fileName);
+            string diffContent = string.Empty;
+            if(string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile))
+            {
+                diffContent = await gitService.GetFullDiffFileFor(id, fileName);
+                string fullDiffFilePath = Path.Combine(diffFilesDirectory, $"{id}_FileReview_{fileName}_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
+                await System.IO.File.WriteAllTextAsync(fileName, diffContent);
+            }
+            
+            var prompt = System.IO.File.ReadAllText("Prompts/ReviewSingleFile.txt");
+            var result = await aiAgent.AskAgent(prompt, fileName);
+
             return View();
+        }
+
+        [HttpGet("SummarizeLocalChanges")]
+        public async Task<IActionResult> SummarizeLocalChanges()
+        {
+            var diffContent = await gitService.GetLocalChangesDiffContent();
+            string fileName = Path.Combine(diffFilesDirectory, $"LocalReview_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
+            await System.IO.File.WriteAllTextAsync(fileName, diffContent);
+            var prompt = System.IO.File.ReadAllText("Prompts/SummarizePullRequest.txt");
+            var result = await aiAgent.AskAgent(prompt, fileName);
+
+            return View();
+        }
+
+        [HttpGet("ReviewLocalChanges")]
+        public async Task<IActionResult> ReviewLocalChanges()
+        {
+            var diffContent = await gitService.GetLocalChangesDiffContent();
+            string fileName = Path.Combine(diffFilesDirectory, $"LocalReview_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
+            await System.IO.File.WriteAllTextAsync(fileName, diffContent);
+            var prompt = System.IO.File.ReadAllText("Prompts/PullRequestReview.txt");
+            var result = await aiAgent.AskAgent(prompt, fileName);
+
+            return View();
+        }
+
+        private string GetLatestReviewFile(int id)
+        {
+            var directoryInfo = new DirectoryInfo(diffFilesDirectory);
+            var latestFile = directoryInfo.GetFiles($"{id}_Review*")
+                                          .OrderByDescending(f => f.LastWriteTime)
+                                          .FirstOrDefault();
+            return latestFile?.FullName;
+        }
+
+        private string GetLatestReviewFile(string fileName)
+        {
+            var directoryInfo = new DirectoryInfo(diffFilesDirectory);
+            var latestFile = directoryInfo.GetFiles($"*{fileName}*")
+                                          .OrderByDescending(f => f.LastWriteTime)
+                                          .FirstOrDefault();
+            return latestFile?.FullName;
         }
     }
 }

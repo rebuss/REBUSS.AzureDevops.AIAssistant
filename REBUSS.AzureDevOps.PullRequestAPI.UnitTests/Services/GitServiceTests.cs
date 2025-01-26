@@ -2,7 +2,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Moq;
-using REBUSS.AzureDevOpsPullRequestAPI.Services;
+using REBUSS.AzureDevOps.PullRequestAPI.Services;
 
 namespace REBUSS.AzureDevOps.PullRequestAPI.UnitTests.Services
 {

@@ -1,0 +1,10 @@
+﻿Please analyze the attached .diff file and provide a concise, professional summary of the changes included. The summary will be used as the description for a pull request in Azure DevOps and should be understandable to various stakeholders, including developers, analysts, and product owners.
+
+The summary should include:
+
+Overview of the changes – A high-level description of what was modified, added, or removed.
+Purpose of the changes – Explain the intent behind the modifications (e.g., new feature implementation, bug fixes, performance improvements, or refactoring).
+Impacted areas – Highlight specific modules, classes, or components affected by the changes.
+Notable technical details – Mention any significant implementation details or architectural decisions, if applicable.
+Potential risks or areas requiring attention – Flag any parts of the changes that may introduce risks or require closer review.
+Ensure the summary is written in clear and professional language, suitable for a mixed audience of technical and non-technical reviewers.

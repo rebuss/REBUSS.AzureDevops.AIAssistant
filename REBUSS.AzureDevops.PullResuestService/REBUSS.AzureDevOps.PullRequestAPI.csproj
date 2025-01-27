@@ -14,5 +14,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="PuppeteerSharp" Version="20.0.5" />
   </ItemGroup>
-
+  <ItemGroup>
+	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+	  <_Parameter1>REBUSS.AzureDevOps.PullRequestAPI.UnitTests</_Parameter1>
+	</AssemblyAttribute>
+  </ItemGroup>
 </Project>

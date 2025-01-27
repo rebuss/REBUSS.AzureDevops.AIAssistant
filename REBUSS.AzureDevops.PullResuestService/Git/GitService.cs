@@ -17,7 +17,7 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.Services
 
         public GitService(IConfiguration configuration, IGitClient gitClient = null)
         {
-            if(configuration is null) throw new ArgumentNullException(nameof(configuration));
+            if (configuration is null) throw new ArgumentNullException(nameof(configuration));
             personalAccessToken = configuration[ConfigConsts.PersonalAccessTokenKey] ?? throw new ArgumentNullException(nameof(personalAccessToken));
             organization = configuration[ConfigConsts.OrganizationNameKey] ?? throw new ArgumentNullException(nameof(organization));
             projectName = configuration[ConfigConsts.ProjectNameKey] ?? throw new ArgumentNullException(nameof(projectName));
@@ -27,55 +27,6 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.Services
         }
 
         public IGitClient GitClient { get; set; }
-
-        public async Task<string> GetPullRequestDiffContent(int pullRequestId, IRepository repo)
-        {
-            var pullRequest = await GitClient.GetPullRequestAsync(pullRequestId);
-            var lastIteration = await GitClient.GetLastIterationAsync(pullRequestId);
-            var changes = await GitClient.GetIterationChangesAsync(pullRequestId, lastIteration.Id.Value);
-            var diffContent = new StringBuilder();
-
-            FetchBranches(repo, pullRequest);
-            await AppendDiffContentForChanges(changes, pullRequest, diffContent);
-
-            return diffContent.ToString();
-        }
-
-        private void FetchBranches(IRepository repo, GitPullRequest pullRequest)
-        {
-            var remote = repo.Network.Remotes["origin"];
-            var fetchOptions = new FetchOptions
-            {
-                CredentialsProvider = (url, usernameFromUrl, types) =>
-                    new UsernamePasswordCredentials
-                    {
-                        Username = string.Empty,
-                        Password = personalAccessToken
-                    }
-            };
-
-            Fetch(repo,
-                remote.Name,
-                new[] {
-                    ExtractBranchNameFromRef(pullRequest.TargetRefName),
-                    ExtractBranchNameFromRef(pullRequest.SourceRefName)
-                },
-                fetchOptions);
-        }
-
-        private void Fetch(IRepository repository, string remoteName, string[] branchNames, FetchOptions options = null)
-        {
-            var repo = repository as Repository;
-            if (repo is not null)
-            {
-                Commands.Fetch(
-                repo,
-                remoteName,
-                branchNames,
-                options,
-                null);
-            }
-        }
 
         public async Task AppendDiffContentForChanges(GitPullRequestIterationChanges changes, GitPullRequest pullRequest, StringBuilder diffContent)
         {
@@ -91,29 +42,6 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.Services
                     diffContent.Append(result);
                 }
             }
-        }
-
-        public async Task<bool> IsLatestCommitIncludedInDiff(string branchName, string diffContent, IRepository repo)
-        {
-            var latestCommitHash = await GetLatestCommitHash(branchName, repo);
-            return diffContent.Contains(latestCommitHash);
-        }
-
-        public async Task<string> GetFullDiffFileFor(int pullRequestId, string fileName)
-        {
-            string branchName = await GetBranchNameForPullRequest(pullRequestId);
-            return await GetGitDiffAsync(branchName, fileName);
-        }
-
-        public async Task<bool> IsLatestCommitIncludedInDiff(int id, string diffFile, IRepository repo)
-        {
-            var diffContent = File.ReadAllText(diffFile);
-            var branchName = await GetBranchNameForPullRequest(id);
-            string latestCommitHash = IsDiffFileContainsChangesInMultipleFiles(diffContent)
-                ? await GetLatestCommitHash(branchName, repo)
-                : await GetLatestCommitHashForFile(ExtractModifiedFileName(diffContent), branchName, repo);
-
-            return diffFile.Contains(latestCommitHash);
         }
 
         public string ExtractModifiedFileName(string diffContent)
@@ -134,20 +62,20 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.Services
             return string.Empty;
         }
 
-        public async Task<string?> GetLocalChangesDiffContent()
+        public async Task<string> GetFullDiffFileFor(int pullRequestId, string fileName)
         {
-            throw new NotImplementedException();
-        }
-
-        public bool IsDiffFileContainsChangesInMultipleFiles(string diffFile)
-        {
-            var fileChangeMarkers = diffFile.Split(new[] { "diff --git" }, StringSplitOptions.None);
-            return fileChangeMarkers.Length > 2;
+            string branchName = await GetBranchNameForPullRequest(pullRequestId);
+            return await GetGitDiffAsync(branchName, fileName);
         }
 
         public async Task<string> GetLatestCommitHashForFile(string fileName, string branchName, IRepository repo)
         {
             var branch = repo.Branches[branchName];
+            if(branch == null)
+            {
+                return string.Empty;
+            }
+
             foreach (var commit in branch.Commits)
             {
                 var treeEntry = commit[fileName];
@@ -156,10 +84,69 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.Services
                     return commit.Sha;
                 }
             }
+
             return string.Empty;
         }
 
-        private async Task<string> GetGitDiffAsync(string remoteCommitId, string localCommitId, string filePath)
+        public async Task<string?> GetLocalChangesDiffContent()
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<string> GetPullRequestDiffContent(int pullRequestId, IRepository repo)
+        {
+            var pullRequest = await GitClient.GetPullRequestAsync(pullRequestId);
+            var lastIteration = await GitClient.GetLastIterationAsync(pullRequestId);
+            var changes = await GitClient.GetIterationChangesAsync(pullRequestId, lastIteration.Id.Value);
+            var diffContent = new StringBuilder();
+
+            var branchNames = new[]  
+            {   
+                ExtractBranchNameFromRef(pullRequest.TargetRefName),
+                ExtractBranchNameFromRef(pullRequest.SourceRefName) 
+            };
+            
+            GitClient.FetchBranches(repo, pullRequest, branchNames);
+            await AppendDiffContentForChanges(changes, pullRequest, diffContent);
+
+            return diffContent.ToString();
+        }
+
+        public bool IsDiffFileContainsChangesInMultipleFiles(string diffFile)
+        {
+            var fileChangeMarkers = diffFile.Split(new[] { "diff --git" }, StringSplitOptions.None);
+            return fileChangeMarkers.Length > 2;
+        }
+
+        public async Task<bool> IsLatestCommitIncludedInDiff(string branchName, string diffContent, IRepository repo)
+        {
+            var latestCommitHash = await GetLatestCommitHash(branchName, repo);
+            return diffContent.Contains(latestCommitHash);
+        }
+
+        public async Task<bool> IsLatestCommitIncludedInDiff(int id, string diffFile, IRepository repo)
+        {
+            var diffContent = File.ReadAllText(diffFile);
+            var branchName = await GetBranchNameForPullRequest(id);
+            string latestCommitHash = IsDiffFileContainsChangesInMultipleFiles(diffContent)
+                ? await GetLatestCommitHash(branchName, repo)
+                : await GetLatestCommitHashForFile(ExtractModifiedFileName(diffContent), branchName, repo);
+
+            return diffFile.Contains(latestCommitHash);
+        }
+
+        internal string ExtractBranchNameFromRef(string refName)
+        {
+            return refName?.Replace("refs/heads/", string.Empty);
+        }
+
+        internal async Task<string> GetBranchNameForPullRequest(int pullRequestId)
+        {
+            var pullRequest = await GitClient.GetPullRequestAsync(pullRequestId);
+            return ExtractBranchNameFromRef(pullRequest.SourceRefName);
+        }
+
+        internal async Task<string> GetGitDiffAsync(string remoteCommitId, string localCommitId, string filePath)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -180,7 +167,7 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.Services
             }
         }
 
-        private async Task<string> GetGitDiffAsync(string branchName, string fileName)
+        internal async Task<string> GetGitDiffAsync(string branchName, string fileName)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -201,22 +188,11 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.Services
             }
         }
 
-        private async Task<string> GetLatestCommitHash(string branchName, IRepository repo)
+        internal async Task<string> GetLatestCommitHash(string branchName, IRepository repo)
         {
             var branch = repo.Branches[branchName];
             var latestCommit = branch.Commits.First();
             return latestCommit.Sha;
-        }
-
-        private async Task<string> GetBranchNameForPullRequest(int pullRequestId)
-        {
-            var pullRequest = await GitClient.GetPullRequestAsync(pullRequestId);
-            return ExtractBranchNameFromRef(pullRequest.SourceRefName);
-        }
-
-        private string ExtractBranchNameFromRef(string refName)
-        {
-            return refName?.Replace("refs/heads/", string.Empty);
         }
     }
 }

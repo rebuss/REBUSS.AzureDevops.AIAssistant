@@ -1,5 +1,6 @@
 ﻿using AzureDevOpsPullRequestAPI;
 using AzureDevOpsPullRequestAPI.Agents;
+using LibGit2Sharp;
 using Microsoft.AspNetCore.Mvc;
 using REBUSS.AzureDevOps.PullRequestAPI.Agents.Copilot;
 using REBUSS.AzureDevOps.PullRequestAPI.Services;
@@ -12,6 +13,7 @@ namespace REBUSS.AzureDevOpsPullRequestAPI.Controllers
     {
         private readonly GitService gitService;
         private readonly string diffFilesDirectory;
+        private readonly string localRepoPath;
         private readonly InterfaceAI aiAgent;
 
         public PullRequestController(IConfiguration config)
@@ -19,6 +21,7 @@ namespace REBUSS.AzureDevOpsPullRequestAPI.Controllers
             gitService = new GitService(config);
             aiAgent = new BrowserCopilot(config);
             diffFilesDirectory = config[ConfigConsts.DiffFilesDirectory] ?? throw new ArgumentNullException(nameof(diffFilesDirectory));
+            localRepoPath = config[ConfigConsts.LocalRepoPathKey] ?? throw new ArgumentNullException(nameof(localRepoPath));
         }
 
         public IActionResult Index()
@@ -29,81 +32,83 @@ namespace REBUSS.AzureDevOpsPullRequestAPI.Controllers
         [HttpGet("GetDiffFile")]
         public async Task<IActionResult> GetDiffFile(int id)
         {
-            var diffContent = await gitService.GetPullRequestDiffContent(id);
-            return Content(diffContent);
+            using (var repo = new Repository(localRepoPath))
+            {
+                var diffContent = await gitService.GetPullRequestDiffContent(id, repo);
+                return Content(diffContent);
+            }
         }
 
         [HttpGet("Summarize")]
         public async Task<IActionResult> Summarize(int id)
         {
-            var diffFile = GetLatestReviewFile(id);
-            string diffContent = string.Empty;
-            if (string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile))
-            {
-                diffContent = await gitService.GetPullRequestDiffContent(id);
-                string fileName = Path.Combine(diffFilesDirectory, $"{id}_Review_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
-                await System.IO.File.WriteAllTextAsync(fileName, diffContent);
-            }
-
-            var prompt = System.IO.File.ReadAllText("Prompts/SummarizePullRequest.txt");
-            var result = await aiAgent.AskAgent(prompt, diffFile);
-
-            return View();
+            return await ProcessPullRequest(id, "Prompts/SummarizePullRequest.txt");
         }
 
         [HttpGet("Review")]
         public async Task<IActionResult> Review(int id)
         {
-            var diffFile = GetLatestReviewFile(id);
-            string diffContent = string.Empty;
-            if (string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile))
-            {
-                diffContent = await gitService.GetPullRequestDiffContent(id);
-                string fileName = Path.Combine(diffFilesDirectory, $"{id}_Review_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
-                await System.IO.File.WriteAllTextAsync(fileName, diffContent);
-            }
-            var prompt = System.IO.File.ReadAllText("Prompts/PullRequestReview.txt");
-            var result = await aiAgent.AskAgent(prompt, diffFile);
+            return await ProcessPullRequest(id, "Prompts/PullRequestReview.txt");
+        }
 
-            return View();
+        [HttpGet("SummarizeLocalChanges")]
+        public async Task<IActionResult> SummarizeLocalChanges()
+        {
+            return await ProcessLocalChanges("Prompts/SummarizePullRequest.txt");
+        }
+
+        [HttpGet("ReviewLocalChanges")]
+        public async Task<IActionResult> ReviewLocalChanges()
+        {
+            return await ProcessLocalChanges("Prompts/PullRequestReview.txt");
         }
 
         public async Task<IActionResult> ReviewSingleFile(int id, string fileName)
         {
             var diffFile = GetLatestReviewFile(fileName);
             string diffContent = string.Empty;
-            if(string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile))
+            using (var repo = new Repository(localRepoPath))
             {
-                diffContent = await gitService.GetFullDiffFileFor(id, fileName);
-                string fullDiffFilePath = Path.Combine(diffFilesDirectory, $"{id}_FileReview_{fileName}_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
-                await System.IO.File.WriteAllTextAsync(fileName, diffContent);
+                if (string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile, repo))
+                {
+                    diffContent = await gitService.GetFullDiffFileFor(id, fileName);
+                    string fullDiffFilePath = Path.Combine(diffFilesDirectory, $"{id}_FileReview_{fileName}_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
+                    await System.IO.File.WriteAllTextAsync(fullDiffFilePath, diffContent);
+                }
             }
-            
+
             var prompt = System.IO.File.ReadAllText("Prompts/ReviewSingleFile.txt");
             var result = await aiAgent.AskAgent(prompt, fileName);
 
             return View();
         }
 
-        [HttpGet("SummarizeLocalChanges")]
-        public async Task<IActionResult> SummarizeLocalChanges()
+        private async Task<IActionResult> ProcessPullRequest(int id, string promptFilePath)
         {
-            var diffContent = await gitService.GetLocalChangesDiffContent();
-            string fileName = Path.Combine(diffFilesDirectory, $"LocalReview_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
-            await System.IO.File.WriteAllTextAsync(fileName, diffContent);
-            var prompt = System.IO.File.ReadAllText("Prompts/SummarizePullRequest.txt");
-            var result = await aiAgent.AskAgent(prompt, fileName);
+            var diffFile = GetLatestReviewFile(id);
+            string diffContent = string.Empty;
+            using (var repo = new Repository(localRepoPath))
+            {
+                if (string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile, repo))
+                {
+                    diffContent = await gitService.GetPullRequestDiffContent(id, repo);
+                    string fileName = Path.Combine(diffFilesDirectory, $"{id}_Review_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
+                    await System.IO.File.WriteAllTextAsync(fileName, diffContent);
+                }
+            }
+
+            var prompt = System.IO.File.ReadAllText(promptFilePath);
+            var result = await aiAgent.AskAgent(prompt, diffFile);
 
             return View();
         }
 
-        [HttpGet("ReviewLocalChanges")]
-        public async Task<IActionResult> ReviewLocalChanges()
+        private async Task<IActionResult> ProcessLocalChanges(string promptFilePath)
         {
             var diffContent = await gitService.GetLocalChangesDiffContent();
             string fileName = Path.Combine(diffFilesDirectory, $"LocalReview_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
             await System.IO.File.WriteAllTextAsync(fileName, diffContent);
-            var prompt = System.IO.File.ReadAllText("Prompts/PullRequestReview.txt");
+            var prompt = System.IO.File.ReadAllText(promptFilePath);
             var result = await aiAgent.AskAgent(prompt, fileName);
 
             return View();

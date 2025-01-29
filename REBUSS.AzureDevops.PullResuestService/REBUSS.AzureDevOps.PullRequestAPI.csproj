@@ -18,5 +18,8 @@
 	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 	  <_Parameter1>REBUSS.AzureDevOps.PullRequestAPI.UnitTests</_Parameter1>
 	</AssemblyAttribute>
+	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+	  <_Parameter1>REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests</_Parameter1>
+	</AssemblyAttribute>
   </ItemGroup>
 </Project>

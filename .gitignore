@@ -4,3 +4,5 @@ obj/
 *.crx
 *.pem
 REBUSS.AzureDevops.PullResuestService/appsettings.Local.json
+REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests/appsettings.test.json
+REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests/appsettings.Local.json

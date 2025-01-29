@@ -1,1 +1,15 @@
-﻿
+﻿Please perform a comprehensive code review of the attached .diff file, focusing on changes made to a single file in a Git repository. As a senior .NET developer and software architect, analyze the modifications holistically, considering the overall structure, maintainability, and adherence to best practices.
+
+Your primary goal is to identify and highlight:**
+
+Bugs and logical errors – Any issues that could lead to incorrect behavior or runtime failures.
+Violations of best practices – Review adherence to SOLID principles, .NET conventions, and performance considerations.
+Opportunities for improvement – Suggest optimizations, refactorings, or better approaches where applicable.
+Security concerns – Identify any security flaws or risks introduced by the changes.
+Code readability and maintainability – Ensure the code remains clear, modular, and easy to maintain.
+For each identified issue:
+
+Clearly reference the specific line numbers in the .diff where the issue occurs.
+Provide a concise but thorough explanation of the problem.
+Suggest a corrected or improved version of the code where necessary.
+Approach this review as if you were a senior reviewer assessing a pull request, ensuring the highest standards of code quality, maintainability, and correctness.

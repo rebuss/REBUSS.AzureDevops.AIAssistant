@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\REBUSS.AzureDevops.PullResuestService\REBUSS.AzureDevOps.PullRequestAPI.csproj" />
+    <ProjectReference Include="..\REBUSS.GitDaif.Service.API\REBUSS.GitDaif.Service.API.csproj" />
   </ItemGroup>
 
   <ItemGroup>

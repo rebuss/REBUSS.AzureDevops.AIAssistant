@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace REBUSS.AzureDevOps.PullRequestAPI.Agents.Copilot
+namespace REBUSS.GitDaif.Service.API.Agents.Helpers
 {
     public class NativeMethods
     {

@@ -1,11 +1,11 @@
-﻿using AzureDevOpsPullRequestAPI;
+﻿using GitDaif.ServiceAPI;
 using FluentAssertions;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using REBUSS.AzureDevOps.PullRequestAPI.Git;
+using REBUSS.GitDaif.Service.API.Git;
 
-namespace REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests.Git
+namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
 {
     [TestFixture]
     public class GitServiceTests
@@ -99,12 +99,6 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests.Git
 
             // Assert
             result.Should().NotBeNullOrEmpty();
-        }
-
-        [TearDown]
-        public void Dispose()
-        {
-            
         }
     }
 }

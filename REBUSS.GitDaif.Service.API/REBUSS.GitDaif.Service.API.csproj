@@ -16,10 +16,10 @@
   </ItemGroup>
   <ItemGroup>
 	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-	  <_Parameter1>REBUSS.AzureDevOps.PullRequestAPI.UnitTests</_Parameter1>
+	  <_Parameter1>REBUSS.GitDaif.Service.API.UnitTests</_Parameter1>
 	</AssemblyAttribute>
 	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-	  <_Parameter1>REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests</_Parameter1>
+	  <_Parameter1>REBUSS.GitDaif.Service.API.IntegrationTests</_Parameter1>
 	</AssemblyAttribute>
   </ItemGroup>
 </Project>

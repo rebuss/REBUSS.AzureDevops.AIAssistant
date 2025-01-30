@@ -1,5 +1,5 @@
 ﻿
-namespace AzureDevOpsPullRequestAPI.Agents
+namespace GitDaif.ServiceAPI.Agents
 {
     public class BrowserChatGPT : InterfaceAI
     {

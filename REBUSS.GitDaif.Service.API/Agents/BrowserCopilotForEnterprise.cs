@@ -1,11 +1,12 @@
-﻿using AzureDevOpsPullRequestAPI;
-using AzureDevOpsPullRequestAPI.Agents;
+﻿using GitDaif.ServiceAPI;
+using GitDaif.ServiceAPI.Agents;
 using PuppeteerSharp;
 using PuppeteerSharp.Helpers;
+using REBUSS.GitDaif.Service.API.Agents.Helpers;
 
-namespace REBUSS.AzureDevOps.PullRequestAPI.Agents.Copilot
+namespace REBUSS.GitDaif.Service.API.Agents
 {
-    public class BrowserCopilot : InterfaceAI
+    public class BrowserCopilotForEnterprise : InterfaceAI
     {
         private readonly string modalWindowName;
         private readonly string userDataDir;
@@ -14,7 +15,7 @@ namespace REBUSS.AzureDevOps.PullRequestAPI.Agents.Copilot
 
         TaskCompletionSource<bool> sessionIsReady = new TaskCompletionSource<bool>();
 
-        public BrowserCopilot(IConfiguration config)
+        public BrowserCopilotForEnterprise(IConfiguration config)
         {
             modalWindowName = config[ConfigConsts.ModalWindowName] ?? throw new ArgumentNullException(nameof(modalWindowName));
             userDataDir = config[ConfigConsts.UserProfileDataDir] ?? throw new ArgumentNullException(nameof(userDataDir));

@@ -1,7 +1,7 @@
 ﻿using LibGit2Sharp;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 
-namespace REBUSS.AzureDevOps.PullRequestAPI.Git.Model
+namespace REBUSS.GitDaif.Service.API.Git.Model
 {
     public interface IGitClient
     {

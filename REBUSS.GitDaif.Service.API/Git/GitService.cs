@@ -1,10 +1,10 @@
-using AzureDevOpsPullRequestAPI;
+using GitDaif.ServiceAPI;
 using LibGit2Sharp;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
-using REBUSS.AzureDevOps.PullRequestAPI.Git.Model;
+using REBUSS.GitDaif.Service.API.Git.Model;
 using System.Text;
 
-namespace REBUSS.AzureDevOps.PullRequestAPI.Git
+namespace REBUSS.GitDaif.Service.API.Git
 {
     public class GitService
     {

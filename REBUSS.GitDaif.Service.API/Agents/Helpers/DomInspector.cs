@@ -1,9 +1,6 @@
 using PuppeteerSharp;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace REBUSS.AzureDevOps.PullRequestAPI.Agents.Copilot
+namespace REBUSS.GitDaif.Service.API.Agents.Helpers
 {
     public class DomInspector
     {

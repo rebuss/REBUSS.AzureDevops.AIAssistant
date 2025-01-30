@@ -6,3 +6,6 @@ obj/
 REBUSS.AzureDevops.PullResuestService/appsettings.Local.json
 REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests/appsettings.test.json
 REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests/appsettings.Local.json
+REBUSS.GitDaif.Service.API/appsettings.Local.json
+REBUSS.GitDaif.Service.API.IntegrationTests/appsettings.Local.json
+REBUSS.GitDaif.Service.API.IntegrationTests/appsettings.test.json

@@ -1,13 +1,13 @@
-﻿using AzureDevOpsPullRequestAPI;
+﻿using GitDaif.ServiceAPI;
 using FluentAssertions;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Moq;
-using REBUSS.AzureDevOps.PullRequestAPI.Git.Model;
-using REBUSS.AzureDevOps.PullRequestAPI.Git;
+using REBUSS.GitDaif.Service.API.Git.Model;
+using REBUSS.GitDaif.Service.API.Git;
 
-namespace REBUSS.AzureDevOps.PullRequestAPI.UnitTests.Git
+namespace REBUSS.GitDaif.Service.API.UnitTests.Git
 {
     [TestFixture]
     public class GitServiceTests

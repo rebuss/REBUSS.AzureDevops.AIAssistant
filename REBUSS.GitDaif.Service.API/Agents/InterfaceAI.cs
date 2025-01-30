@@ -1,4 +1,4 @@
-﻿namespace AzureDevOpsPullRequestAPI.Agents
+﻿namespace GitDaif.ServiceAPI.Agents
 {
     public interface InterfaceAI
     {

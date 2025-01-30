@@ -1,11 +1,11 @@
-﻿using AzureDevOpsPullRequestAPI;
-using AzureDevOpsPullRequestAPI.Agents;
+﻿using GitDaif.ServiceAPI;
+using GitDaif.ServiceAPI.Agents;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Mvc;
-using REBUSS.AzureDevOps.PullRequestAPI.Agents.Copilot;
-using REBUSS.AzureDevOps.PullRequestAPI.Git;
+using REBUSS.GitDaif.Service.API.Agents;
+using REBUSS.GitDaif.Service.API.Git;
 
-namespace REBUSS.AzureDevOpsPullRequestAPI.Controllers
+namespace REBUSS.GitDaif.Service.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -19,7 +19,7 @@ namespace REBUSS.AzureDevOpsPullRequestAPI.Controllers
         public PullRequestController(IConfiguration config)
         {
             gitService = new GitService(config);
-            aiAgent = new BrowserCopilot(config);
+            aiAgent = new BrowserCopilotForEnterprise(config);
             diffFilesDirectory = config[ConfigConsts.DiffFilesDirectory] ?? throw new ArgumentNullException(nameof(diffFilesDirectory));
             localRepoPath = config[ConfigConsts.LocalRepoPathKey] ?? throw new ArgumentNullException(nameof(localRepoPath));
         }

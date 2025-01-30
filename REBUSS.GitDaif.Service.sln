@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REBUSS.GitDaif.Service.API", "REBUSS.GitDaif.Service.API\REBUSS.GitDaif.Service.API.csproj", "{E9B814C9-EBE8-4671-9742-4E69AA33CF47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REBUSS.GitDaif.Service.API.IntegrationTests", "REBUSS.GitDaif.Service.API.IntegrationTests\REBUSS.GitDaif.Service.API.IntegrationTests.csproj", "{CA74828E-3519-4D73-ABBF-938C32C09AFC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "REBUSS.GitDaif.Service.API.UnitTests", "REBUSS.GitDaif.Service.API.UnitTests\REBUSS.GitDaif.Service.API.UnitTests.csproj", "{11E0442B-B9FF-4383-8DCB-DCD080667E10}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E9B814C9-EBE8-4671-9742-4E69AA33CF47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9B814C9-EBE8-4671-9742-4E69AA33CF47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9B814C9-EBE8-4671-9742-4E69AA33CF47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9B814C9-EBE8-4671-9742-4E69AA33CF47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA74828E-3519-4D73-ABBF-938C32C09AFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA74828E-3519-4D73-ABBF-938C32C09AFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA74828E-3519-4D73-ABBF-938C32C09AFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA74828E-3519-4D73-ABBF-938C32C09AFC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11E0442B-B9FF-4383-8DCB-DCD080667E10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11E0442B-B9FF-4383-8DCB-DCD080667E10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11E0442B-B9FF-4383-8DCB-DCD080667E10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11E0442B-B9FF-4383-8DCB-DCD080667E10}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

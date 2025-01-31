@@ -1,5 +1,4 @@
 ﻿using GitDaif.ServiceAPI;
-using FluentAssertions;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -44,7 +43,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.ExtractBranchNameFromRef("refs/heads/testBranch");
 
             // Assert
-            result.Should().Be("testBranch");
+            Assert.That(result, Is.EqualTo("testBranch"));
         }
 
         [Test]
@@ -57,7 +56,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.ExtractModifiedFileName(diffContent);
 
             // Assert
-            result.Should().Be("file1.txt");
+            Assert.That(result, Is.EqualTo("file1.txt"));
         }
 
         [Test]
@@ -70,7 +69,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.ExtractModifiedFileName(diffContent);
 
             // Assert
-            result.Should().BeEmpty();
+            Assert.That(result, Is.Empty);
         }
 
         [Test]
@@ -83,7 +82,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.ExtractModifiedFileName(diffContent);
 
             // Assert
-            result.Should().Be("file1.txt");
+            Assert.That(result, Is.EqualTo("file1.txt"));
         }
 
         [Test]
@@ -110,7 +109,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.GetLatestCommitHashForFile(fileName, branchName, mockRepository.Object);
 
             // Assert
-            result.Should().Be(expectedCommitHash);
+            Assert.That(result, Is.EqualTo(expectedCommitHash));
         }
 
         [Test]
@@ -134,7 +133,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.GetLatestCommitHashForFile(fileName, branchName, mockRepository.Object);
 
             // Assert
-            result.Should().BeEmpty();
+            Assert.That(result, Is.Empty);
         }
 
         [Test]
@@ -152,7 +151,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.GetLatestCommitHashForFile(fileName, branchName, mockRepository.Object);
 
             // Assert
-            result.Should().BeEmpty();
+            Assert.That(result, Is.Empty);
         }
 
         [Test]
@@ -174,7 +173,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.IsDiffFileContainsChangesInMultipleFiles(diffFile);
 
             // Assert
-            result.Should().BeTrue();
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -191,7 +190,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.IsDiffFileContainsChangesInMultipleFiles(diffFile);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.That(result, Is.False);
         }
 
         [Test]
@@ -204,7 +203,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.IsDiffFileContainsChangesInMultipleFiles(diffFile);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.That(result, Is.False);
         }
 
         [Test]
@@ -229,7 +228,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.IsLatestCommitIncludedInDiff(branchName, diffContent, mockRepository.Object);
 
             // Assert
-            result.Should().BeTrue();
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -254,7 +253,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.IsLatestCommitIncludedInDiff(branchName, diffContent, mockRepository.Object);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.That(result, Is.False);
         }
 
         [Test]
@@ -272,7 +271,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.IsLatestCommitIncludedInDiff(branchName, diffContent, mockRepository.Object);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.That(result, Is.False);
         }
 
         [Test]
@@ -302,7 +301,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
 
             // Assert
-            result.Should().BeTrue();
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -330,7 +329,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.That(result, Is.False);
         }
 
         [Test]
@@ -351,7 +350,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.That(result, Is.False);
         }
 
         [Test]
@@ -381,7 +380,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
 
             // Assert
-            result.Should().BeTrue();
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -409,7 +408,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
 
             // Assert
-            result.Should().BeFalse();
+            Assert.That(result, Is.False);
         }
 
         [Test]
@@ -429,7 +428,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
 
             // Assert
-            result.Should().Be(expectedBranchName);
+            Assert.That(result, Is.EqualTo(expectedBranchName));
         }
 
         [Test]
@@ -445,7 +444,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
 
             // Assert
-            result.Should().BeNull();
+            Assert.That(result, Is.Null);
         }
 
         [Test]
@@ -464,7 +463,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
 
             // Assert
-            result.Should().BeNull();
+            Assert.That(result, Is.Null);
         }
 
         [Test]
@@ -483,7 +482,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
 
             // Assert
-            result.Should().BeEmpty();
+            Assert.That(result, Is.Empty);
         }
 
         [Test]
@@ -496,7 +495,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.PrepareFilePath(filePath);
 
             // Assert
-            result.Should().BeEmpty();
+            Assert.That(result, Is.Empty);
         }
 
         [Test]
@@ -509,7 +508,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.PrepareFilePath(filePath);
 
             // Assert
-            result.Should().Be("xxx/.cpp");
+            Assert.That(result, Is.EqualTo("xxx/.cpp"));
         }
 
         [Test]
@@ -522,7 +521,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.PrepareFilePath(filePath);
 
             // Assert
-            result.Should().Be(filePath);
+            Assert.That(result, Is.EqualTo(filePath));
         }
 
         [Test]
@@ -535,7 +534,7 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var result = _gitService.PrepareFilePath(filePath);
 
             // Assert
-            result.Should().BeEmpty();
+            Assert.That(result, Is.Empty);
         }
     }
 }

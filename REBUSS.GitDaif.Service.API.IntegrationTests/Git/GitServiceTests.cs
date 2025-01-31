@@ -1,9 +1,9 @@
 ﻿using GitDaif.ServiceAPI;
-using FluentAssertions;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using REBUSS.GitDaif.Service.API.Git;
+using NUnit.Framework;
 
 namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
 {
@@ -47,11 +47,11 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
             var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
 
             // Assert
-            result.Should().Be(_branchName);
+            Assert.That(result, Is.EqualTo(_branchName));
         }
 
         [Test]
-        public async Task GetDiffContnentForChanges_Should_Return_Valid_Diff()
+        public async Task GetDiffContentForChanges_Should_Return_Valid_Diff()
         {
             // Arrange
             var localRepoPath = _configuration[ConfigConsts.LocalRepoPathKey];
@@ -60,7 +60,8 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
             var result = await _gitService.GetPullRequestDiffContent(_pullRequestId, new Repository(localRepoPath));
 
             // Assert
-            result.Should().NotBeNullOrEmpty();
+            Assert.That(result, Is.Not.Empty);
+            Assert.That(result, Is.Not.Null);
         }
 
         [Test]
@@ -73,9 +74,8 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
             // Act
             var result = _gitService.ExtractModifiedFileName(diffContent);
 
-
             // Assert
-            result.Should().Be(Path.GetFileName(_filePath));
+            Assert.That(result, Is.EqualTo(Path.GetFileName(_filePath)));
         }
 
         [Test]
@@ -88,17 +88,19 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
             var result = await _gitService.GetFullDiffFileFor(new Repository(localRepoPath), _pullRequestId, _filePath);
 
             // Assert
-            result.Should().NotBeNullOrEmpty();
+            Assert.That(result, Is.Not.Empty);
+            Assert.That(result, Is.Not.Null);
         }
 
         [Test]
-        public async Task GetLocalChangesDiffContent_Should_Retrun_Valid_Diff_For_Staged_Changes_Only()
+        public async Task GetLocalChangesDiffContent_Should_Return_Valid_Diff_For_Staged_Changes_Only()
         {
             // Act
             var result = await _gitService.GetLocalChangesDiffContent();
 
             // Assert
-            result.Should().NotBeNullOrEmpty();
+            Assert.That(result, Is.Not.Empty);
+            Assert.That(result, Is.Not.Null);
         }
     }
 }

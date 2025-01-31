@@ -40,11 +40,9 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
         [Test]
         public async Task GetBranchNameForPullRequest_Should_Return_Correct_BranchName()
         {
-            // Arrange
-            var pullRequestId = 42882;
 
             // Act
-            var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
+            var result = await _gitService.GetBranchNameForPullRequest(_pullRequestId);
 
             // Assert
             Assert.That(result, Is.EqualTo(_branchName));

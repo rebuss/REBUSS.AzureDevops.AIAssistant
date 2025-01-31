@@ -9,14 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="appsettings.Local.json" />
     <None Remove="appsettings.test.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="appsettings.Local.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="appsettings.test.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

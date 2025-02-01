@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.Services.Common;
 using Microsoft.VisualStudio.Services.WebApi;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
 
-namespace REBUSS.GitDaif.Service.API.Git.Model
+namespace REBUSS.GitDaif.Service.API.Services.Model
 {
     public class GitClient : IGitClient
     {
@@ -11,7 +11,7 @@ namespace REBUSS.GitDaif.Service.API.Git.Model
 
         public GitClient(string pat)
         {
-            this.personalAccessToken = pat;
+            personalAccessToken = pat;
         }
 
         public async Task<GitPullRequest> GetPullRequestAsync(PullRequestData prData)

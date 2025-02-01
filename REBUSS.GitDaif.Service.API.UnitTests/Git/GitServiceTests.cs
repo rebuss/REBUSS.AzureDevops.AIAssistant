@@ -3,9 +3,9 @@ using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Moq;
-using REBUSS.GitDaif.Service.API.Git.Model;
-using REBUSS.GitDaif.Service.API.Git;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
+using REBUSS.GitDaif.Service.API.Services;
+using REBUSS.GitDaif.Service.API.Services.Model;
 
 namespace REBUSS.GitDaif.Service.API.UnitTests.Git
 {

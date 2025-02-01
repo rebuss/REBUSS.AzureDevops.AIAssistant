@@ -2,10 +2,10 @@ using GitDaif.ServiceAPI;
 using LibGit2Sharp;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
-using REBUSS.GitDaif.Service.API.Git.Model;
+using REBUSS.GitDaif.Service.API.Services.Model;
 using System.Text;
 
-namespace REBUSS.GitDaif.Service.API.Git
+namespace REBUSS.GitDaif.Service.API.Services
 {
     public class GitService
     {

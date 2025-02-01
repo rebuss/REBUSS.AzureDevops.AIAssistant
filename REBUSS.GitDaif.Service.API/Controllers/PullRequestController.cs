@@ -6,7 +6,7 @@ using REBUSS.GitDaif.Service.API;
 using REBUSS.GitDaif.Service.API.Agents;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
 using REBUSS.GitDaif.Service.API.DTO.Responses;
-using REBUSS.GitDaif.Service.API.Git;
+using REBUSS.GitDaif.Service.API.Services;
 
 namespace REBUSS.GitDaif.Service.Controllers
 {
@@ -19,14 +19,16 @@ namespace REBUSS.GitDaif.Service.Controllers
         private readonly string localRepoPath;
         private readonly InterfaceAI aiAgent;
         private readonly ILogger<PullRequestController> logger;
+        private readonly DiffFileCleanerService diffFileCleaner;
 
-        public PullRequestController(IConfiguration config, ILogger<PullRequestController> logger)
+        public PullRequestController(IConfiguration config, ILogger<PullRequestController> logger, DiffFileCleanerService diffFileCleanerService)
         {
             gitService = new GitService(config);
             aiAgent = new BrowserCopilotForEnterprise(config);
             diffFilesDirectory = config[ConfigConsts.DiffFilesDirectory] ?? throw new ArgumentNullException(nameof(diffFilesDirectory));
             localRepoPath = config[ConfigConsts.LocalRepoPathKey] ?? throw new ArgumentNullException(nameof(localRepoPath));
             this.logger = logger;
+            diffFileCleaner = diffFileCleanerService;
         }
 
         public IActionResult Index()

@@ -19,21 +19,14 @@ namespace REBUSS.GitDaif.Service.Controllers
         private readonly string localRepoPath;
         private readonly InterfaceAI aiAgent;
         private readonly ILogger<PullRequestController> logger;
-        private readonly DiffFileCleanerService diffFileCleaner;
 
-        public PullRequestController(IConfiguration config, ILogger<PullRequestController> logger, DiffFileCleanerService diffFileCleanerService)
+        public PullRequestController(IConfiguration config, ILogger<PullRequestController> logger)
         {
             gitService = new GitService(config);
             aiAgent = new BrowserCopilotForEnterprise(config);
             diffFilesDirectory = config[ConfigConsts.DiffFilesDirectory] ?? throw new ArgumentNullException(nameof(diffFilesDirectory));
             localRepoPath = config[ConfigConsts.LocalRepoPathKey] ?? throw new ArgumentNullException(nameof(localRepoPath));
             this.logger = logger;
-            diffFileCleaner = diffFileCleanerService;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
         }
 
         [HttpPost("GetDiffFile")]

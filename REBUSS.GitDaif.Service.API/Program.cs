@@ -1,4 +1,6 @@
 using GitDaif.ServiceAPI;
+using Microsoft.Extensions.Options;
+using REBUSS.GitDaif.Service.API;
 using REBUSS.GitDaif.Service.API.Services;
 using Serilog;
 
@@ -10,13 +12,13 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 builder.Services.AddControllers();
-// Register DiffFileCleanerService with the diffFilesDirectory from configuration
+builder.Services.Configure<AppSettings>(builder.Configuration);
 builder.Services.AddHostedService<DiffFileCleanerBackgroundService>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
     var logger = provider.GetRequiredService<ILogger<DiffFileCleanerBackgroundService>>();
-    var diffFilesDirectory = configuration[ConfigConsts.DiffFilesDirectory];
-    return new DiffFileCleanerBackgroundService(diffFilesDirectory, logger);
+    var appSettings = provider.GetRequiredService<IOptions<AppSettings>>().Value;
+    return new DiffFileCleanerBackgroundService(appSettings.DiffFilesDirectory, logger);
 });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();

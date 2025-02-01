@@ -1,5 +1,6 @@
 using GitDaif.ServiceAPI;
 using LibGit2Sharp;
+using Microsoft.Extensions.Options;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
 using REBUSS.GitDaif.Service.API.Services.Model;
@@ -14,20 +15,20 @@ namespace REBUSS.GitDaif.Service.API.Services
         private readonly ILogger<GitService> logger;
 
         [ActivatorUtilitiesConstructor]
-        public GitService(IConfiguration configuration, ILogger<GitService> logger) : this(configuration)
+        public GitService(IOptions<AppSettings> settings, ILogger<GitService> logger) : this(settings.Value)
         {
             this.logger = logger;
         }
 
-        public GitService(IConfiguration configuration) : this(configuration, (IGitClient)null)
+        public GitService(AppSettings settings) : this(settings, (IGitClient)null)
         {
         }
 
-        public GitService(IConfiguration configuration, IGitClient gitClient)
+        public GitService(AppSettings settings, IGitClient gitClient)
         {
-            if (configuration is null) throw new ArgumentNullException(nameof(configuration));
-            personalAccessToken = configuration[ConfigConsts.PersonalAccessTokenKey] ?? throw new ArgumentNullException(nameof(personalAccessToken));
-            localRepoPath = configuration[ConfigConsts.LocalRepoPathKey] ?? throw new ArgumentNullException(nameof(localRepoPath));
+            if (settings is null) throw new ArgumentNullException(nameof(settings));
+            personalAccessToken = settings.PersonalAccessToken ?? throw new ArgumentNullException(nameof(personalAccessToken));
+            localRepoPath = settings.LocalRepoPath ?? throw new ArgumentNullException(nameof(localRepoPath));
             GitClient = gitClient ?? new GitClient(personalAccessToken);
         }
 

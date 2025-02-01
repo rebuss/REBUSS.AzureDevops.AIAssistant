@@ -1,6 +1,4 @@
-﻿using GitDaif.ServiceAPI;
-using LibGit2Sharp;
-using Microsoft.Extensions.Configuration;
+﻿using LibGit2Sharp;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Moq;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
@@ -12,20 +10,20 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
     [TestFixture]
     public class GitServiceTests
     {
-        private Mock<IConfiguration> _configurationMock;
+        private AppSettings _appSettingsMock;
         private GitService _gitService;
         private Mock<IGitClient> _gitClientMock;
 
         [SetUp]
         public void SetUp()
         {
-            _configurationMock = new Mock<IConfiguration>();
+            _appSettingsMock = new AppSettings();
             _gitClientMock = new Mock<IGitClient>();
 
-            _configurationMock.Setup(config => config[ConfigConsts.PersonalAccessTokenKey]).Returns("testToken");
-            _configurationMock.Setup(config => config[ConfigConsts.LocalRepoPathKey]).Returns("testPath");
+            _appSettingsMock.PersonalAccessToken = "testToken";
+            _appSettingsMock.LocalRepoPath = "testPath";
 
-            _gitService = new GitService(_configurationMock.Object, _gitClientMock.Object);
+            _gitService = new GitService(_appSettingsMock, _gitClientMock.Object);
         }
 
         [Test]

@@ -2,9 +2,9 @@
 {
     public class ConfigConsts
     {
-        public const string PersonalAccessTokenKey = "GitDaif.Service:PersonalAccessToken";
-        public const string LocalRepoPathKey = "GitDaif.Service:LocalRepoPath";
-        public const string DiffFilesDirectory = "GitDaif.Service:DiffFilesDirectory";
+        public const string PersonalAccessTokenKey = "PersonalAccessToken";
+        public const string LocalRepoPathKey = "LocalRepoPath";
+        public const string DiffFilesDirectory = "DiffFilesDirectory";
         public const string MicrosoftAccount = MicrosoftCopilot + "AccountName";
         public const string EdgePath = MicrosoftCopilot + "MsEdgePath";
         public const string UserProfileDataDir = MicrosoftCopilot + "UserProfileDataDir";

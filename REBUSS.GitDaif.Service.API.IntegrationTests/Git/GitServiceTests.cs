@@ -11,17 +11,18 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
     public class GitServiceTests
     {
         private GitService _gitService;
-        private IConfiguration _configuration;
         private string _filePath;
         private string _branchName;
+        private AppSettings _appSettings;
 
         [SetUp]
         public void Setup()
         {
             var serviceCollection = new ServiceCollection();
-            _configuration = BuildConfiguration();
-            _gitService = new GitService(_configuration);
+            _appSettings = BuildSettings();
+            _gitService = new GitService(_appSettings);
 
+            _branchName = "testing";
         }
 
         [Test]
@@ -39,7 +40,7 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
         public async Task GetDiffContentForChanges_Should_Return_Valid_Diff()
         {
             // Arrange
-            var localRepoPath = _configuration[ConfigConsts.LocalRepoPathKey];
+            var localRepoPath = _appSettings.LocalRepoPath;
 
             // Act
             var result = await _gitService.GetPullRequestDiffContent(GetPullRequestData(), new Repository(localRepoPath));
@@ -53,7 +54,7 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
         public async Task ExtractModifiedFileName_Should_Return_Correct_FileName()
         {
             // Arrange
-            var localRepoPath = _configuration[ConfigConsts.LocalRepoPathKey];
+            var localRepoPath = _appSettings.LocalRepoPath;
             var diffContent = await _gitService.GetPullRequestDiffContent(GetPullRequestData(), new Repository(localRepoPath));
 
             // Act
@@ -67,7 +68,7 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
         public async Task GetFullDiffFileFor_Should_Return_Valid_Diff()
         {
             // Arrange
-            var localRepoPath = _configuration[ConfigConsts.LocalRepoPathKey];
+            var localRepoPath = _appSettings.LocalRepoPath;
 
             // Act
             var result = await _gitService.GetFullDiffFileFor(new Repository(localRepoPath), GetPullRequestData(), _filePath);
@@ -88,12 +89,19 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
             Assert.That(result, Is.Not.Null);
         }
 
-        private IConfiguration BuildConfiguration()
+        private AppSettings BuildSettings()
         {
-            return new ConfigurationBuilder()
+            var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
+
+            return new AppSettings()
+            {
+                DiffFilesDirectory = config[ConfigConsts.DiffFilesDirectory],
+                LocalRepoPath = config[ConfigConsts.LocalRepoPathKey],
+                PersonalAccessToken = config[ConfigConsts.PersonalAccessTokenKey]
+            };
         }
 
         private PullRequestData GetPullRequestData()
@@ -108,4 +116,3 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
         }
     }
 }
-

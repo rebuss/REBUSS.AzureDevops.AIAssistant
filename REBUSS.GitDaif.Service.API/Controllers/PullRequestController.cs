@@ -2,6 +2,7 @@
 using GitDaif.ServiceAPI.Agents;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using REBUSS.GitDaif.Service.API;
 using REBUSS.GitDaif.Service.API.Agents;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
@@ -20,12 +21,12 @@ namespace REBUSS.GitDaif.Service.Controllers
         private readonly InterfaceAI aiAgent;
         private readonly ILogger<PullRequestController> logger;
 
-        public PullRequestController(IConfiguration config, ILogger<PullRequestController> logger)
+        public PullRequestController(IOptions<AppSettings> settings, ILogger<PullRequestController> logger, IConfiguration config)
         {
-            gitService = new GitService(config);
+            gitService = new GitService(settings.Value);
             aiAgent = new BrowserCopilotForEnterprise(config);
-            diffFilesDirectory = config[ConfigConsts.DiffFilesDirectory] ?? throw new ArgumentNullException(nameof(diffFilesDirectory));
-            localRepoPath = config[ConfigConsts.LocalRepoPathKey] ?? throw new ArgumentNullException(nameof(localRepoPath));
+            diffFilesDirectory = settings.Value.DiffFilesDirectory ?? throw new ArgumentNullException(nameof(diffFilesDirectory));
+            localRepoPath = settings.Value.LocalRepoPath ?? throw new ArgumentNullException(nameof(localRepoPath));
             this.logger = logger;
         }
 

@@ -1,7 +1,9 @@
-﻿namespace GitDaif.ServiceAPI.Agents
+﻿using REBUSS.GitDaif.Service.API.DTO.Responses;
+
+namespace GitDaif.ServiceAPI.Agents
 {
     public interface InterfaceAI
     {
-        Task<object> AskAgent(string prompt, string filePath = null);
+        Task<BaseResponse> AskAgent(string prompt, string filePath = null);
     }
 }

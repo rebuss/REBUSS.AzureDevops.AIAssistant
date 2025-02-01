@@ -3,6 +3,7 @@ using GitDaif.ServiceAPI.Agents;
 using PuppeteerSharp;
 using PuppeteerSharp.Helpers;
 using REBUSS.GitDaif.Service.API.Agents.Helpers;
+using REBUSS.GitDaif.Service.API.DTO.Responses;
 
 namespace REBUSS.GitDaif.Service.API.Agents
 {
@@ -44,7 +45,7 @@ namespace REBUSS.GitDaif.Service.API.Agents
             return tcs.Task;
         }
 
-        public async Task<object> AskAgent(string prompt, string filePath = null)
+        public async Task<BaseResponse> AskAgent(string prompt, string filePath = null)
         {
             var browser = await Puppeteer.LaunchAsync(new LaunchOptions
             {

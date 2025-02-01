@@ -4,6 +4,7 @@ using LibGit2Sharp;
 using Microsoft.AspNetCore.Mvc;
 using REBUSS.GitDaif.Service.API.Agents;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
+using REBUSS.GitDaif.Service.API.DTO.Responses;
 using REBUSS.GitDaif.Service.API.Git;
 
 namespace REBUSS.GitDaif.Service.Controllers
@@ -40,7 +41,7 @@ namespace REBUSS.GitDaif.Service.Controllers
                 using (var repo = new Repository(localRepoPath))
                 {
                     var diffContent = await gitService.GetPullRequestDiffContent(data, repo);
-                    return Content(diffContent);
+                    return Ok(GetResponse(diffContent));
                 }
             }
             catch (Exception ex)
@@ -55,7 +56,8 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
-                return await ProcessPullRequest(data, "Prompts/SummarizePullRequest.txt");
+                PreProcessPullRequestData(data, "Prompts/SummarizePullRequest.txt");
+                return await ProcessPullRequest(data);
             }
             catch (Exception ex)
             {
@@ -69,7 +71,8 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
-                return await ProcessPullRequest(data, "Prompts/PullRequestReview.txt");
+                PreProcessPullRequestData(data, "Prompts/PullRequestReview.txt");
+                return await ProcessPullRequest(data);
             }
             catch (Exception ex)
             {
@@ -83,7 +86,8 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
-                return await ProcessLocalChanges("Prompts/SummarizePullRequest.txt");
+                PreProcessPullRequestData(data, "Prompts/SummarizePullRequest.txt");
+                return await ProcessLocalChanges(data.Query);
             }
             catch (Exception ex)
             {
@@ -97,7 +101,8 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
-                return await ProcessLocalChanges("Prompts/PullRequestReview.txt");
+                PreProcessPullRequestData(data, "Prompts/PullRequestReview.txt");
+                return await ProcessLocalChanges(data.Query);
             }
             catch (Exception ex)
             {
@@ -123,7 +128,8 @@ namespace REBUSS.GitDaif.Service.Controllers
                         diffFile = await SaveDiffContentToFile(diffContent, $"{data.Id}_FileReview_{fileName}");
                     }
 
-                    return await ReviewSingleFile(diffFile);
+                    PreProcessPullRequestData(data, "Prompts/ReviewSingleFile.txt");
+                    return await ReviewSingleFile(diffFile, data.Query);
                 }
             }
             catch (Exception ex)
@@ -143,7 +149,8 @@ namespace REBUSS.GitDaif.Service.Controllers
                     var fileName = FormatFileName(data.FilePath);
                     var diffContent = await gitService.GetFullDiffFileForLocal(repo, data.FilePath);
                     var diffFile = await SaveDiffContentToFile(diffContent, $"LocalFileReview_{fileName}");
-                    return await ReviewSingleFile(diffFile);
+                    PreProcessPullRequestData(data, "Prompts/ReviewSingleFile.txt");
+                    return await ReviewSingleFile(diffFile, data.Query);
                 }
             }
             catch (Exception ex)
@@ -153,11 +160,10 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
         }
 
-        private async Task<IActionResult> ReviewSingleFile(string diffFilePath)
+        private async Task<IActionResult> ReviewSingleFile(string diffFilePath, string prompt)
         {
-            var prompt = System.IO.File.ReadAllText("Prompts/ReviewSingleFile.txt");
             var result = await aiAgent.AskAgent(prompt, diffFilePath);
-            return Ok();
+            return Ok(result);
         }
 
         private string FormatFileName(string filePath)
@@ -172,7 +178,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             return fullDiffFilePath;
         }
 
-        private async Task<IActionResult> ProcessPullRequest(PullRequestData prData, string promptFilePath)
+        private async Task<IActionResult> ProcessPullRequest(PullRequestData prData)
         {
             var diffFile = GetLatestReviewFile(prData.Id);
             string diffContent = string.Empty;
@@ -186,21 +192,19 @@ namespace REBUSS.GitDaif.Service.Controllers
                 }
             }
 
-            var prompt = System.IO.File.ReadAllText(promptFilePath);
-            var result = await aiAgent.AskAgent(prompt, diffFile);
+            var result = await aiAgent.AskAgent(prData.Query, diffFile);
 
-            return Ok();
+            return Ok(result);
         }
 
-        private async Task<IActionResult> ProcessLocalChanges(string promptFilePath)
+        private async Task<IActionResult> ProcessLocalChanges(string prompt)
         {
             var diffContent = await gitService.GetLocalChangesDiffContent();
             string fileName = Path.Combine(diffFilesDirectory, $"LocalReview_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
             await System.IO.File.WriteAllTextAsync(fileName, diffContent);
-            var prompt = System.IO.File.ReadAllText(promptFilePath);
             var result = await aiAgent.AskAgent(prompt, fileName);
 
-            return Ok();
+            return Ok(result);
         }
 
         private string GetLatestReviewFile(int id)
@@ -219,6 +223,24 @@ namespace REBUSS.GitDaif.Service.Controllers
                                           .OrderByDescending(f => f.LastWriteTime)
                                           .FirstOrDefault();
             return latestFile?.FullName;
+        }
+
+        private BaseResponse GetResponse(string message, bool success = true)
+        {
+            return new BaseResponse
+            {
+                Success = success,
+                Message = message,
+                Timestamp = DateTime.Now
+            };
+        }
+
+        private void PreProcessPullRequestData(BaseQueryData data, string defaultPropmptPath)
+        {
+            if (string.IsNullOrEmpty(data.Query))
+            {
+                data.Query = System.IO.File.ReadAllText(defaultPropmptPath);
+            }
         }
     }
 }

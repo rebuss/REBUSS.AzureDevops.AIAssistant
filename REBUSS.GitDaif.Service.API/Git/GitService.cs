@@ -15,7 +15,17 @@ namespace REBUSS.GitDaif.Service.API.Git
         private readonly string localRepoPath;
         private readonly ILogger<GitService> logger;
 
-        public GitService(IConfiguration configuration, IGitClient gitClient = null)
+        [ActivatorUtilitiesConstructor]
+        public GitService(IConfiguration configuration, ILogger<GitService> logger) : this(configuration)
+        {
+            this.logger = logger;
+        }
+
+        public GitService(IConfiguration configuration) : this(configuration, (IGitClient)null)
+        {
+        }
+
+        public GitService(IConfiguration configuration, IGitClient gitClient)
         {
             if (configuration is null) throw new ArgumentNullException(nameof(configuration));
             personalAccessToken = configuration[ConfigConsts.PersonalAccessTokenKey] ?? throw new ArgumentNullException(nameof(personalAccessToken));
@@ -24,12 +34,6 @@ namespace REBUSS.GitDaif.Service.API.Git
             repo = configuration[ConfigConsts.RepositoryNameKey] ?? throw new ArgumentNullException(nameof(repo));
             localRepoPath = configuration[ConfigConsts.LocalRepoPathKey] ?? throw new ArgumentNullException(nameof(localRepoPath));
             GitClient = gitClient ?? new GitClient(organization, repo, projectName, personalAccessToken);
-        }
-
-        [ActivatorUtilitiesConstructor]
-        public GitService(IConfiguration configuration, ILogger<GitService> logger) : this(configuration)
-        {
-            this.logger = logger;
         }
 
         public IGitClient GitClient { get; set; }

@@ -31,7 +31,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             return View();
         }
 
-        [HttpGet("GetDiffFile")]
+        [HttpPost("GetDiffFile")]
         public async Task<IActionResult> GetDiffFile(int id)
         {
             try
@@ -49,7 +49,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
         }
 
-        [HttpGet("Summarize")]
+        [HttpPost("Summarize")]
         public async Task<IActionResult> Summarize(int id)
         {
             try
@@ -63,7 +63,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
         }
 
-        [HttpGet("Review")]
+        [HttpPost("Review")]
         public async Task<IActionResult> Review(int id)
         {
             try
@@ -77,7 +77,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
         }
 
-        [HttpGet("SummarizeLocalChanges")]
+        [HttpPost("SummarizeLocalChanges")]
         public async Task<IActionResult> SummarizeLocalChanges()
         {
             try
@@ -91,7 +91,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
         }
 
-        [HttpGet("ReviewLocalChanges")]
+        [HttpPost("ReviewLocalChanges")]
         public async Task<IActionResult> ReviewLocalChanges()
         {
             try
@@ -105,7 +105,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
         }
 
-        [HttpGet("ReviewSingleFile")]
+        [HttpPost("ReviewSingleFile")]
         public async Task<IActionResult> ReviewSingleFile(int id, string filePath)
         {
             try
@@ -132,7 +132,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
         }
 
-        [HttpGet("ReviewSingleLocalFile")]
+        [HttpPost("ReviewSingleLocalFile")]
         public async Task<IActionResult> ReviewSingleLocalFile(string filePath)
         {
             try
@@ -156,7 +156,7 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             var prompt = System.IO.File.ReadAllText("Prompts/ReviewSingleFile.txt");
             var result = await aiAgent.AskAgent(prompt, diffFilePath);
-            return View();
+            return Ok();
         }
 
         private string FormatFileName(string filePath)
@@ -188,7 +188,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             var prompt = System.IO.File.ReadAllText(promptFilePath);
             var result = await aiAgent.AskAgent(prompt, diffFile);
 
-            return View();
+            return Ok();
         }
 
         private async Task<IActionResult> ProcessLocalChanges(string promptFilePath)
@@ -199,7 +199,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             var prompt = System.IO.File.ReadAllText(promptFilePath);
             var result = await aiAgent.AskAgent(prompt, fileName);
 
-            return View();
+            return Ok();
         }
 
         private string GetLatestReviewFile(int id)

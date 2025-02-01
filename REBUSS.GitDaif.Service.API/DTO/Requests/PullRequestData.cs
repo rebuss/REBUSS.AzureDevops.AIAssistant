@@ -1,4 +1,4 @@
-﻿namespace REBUSS.GitDaif.Service.API.DTO
+﻿namespace REBUSS.GitDaif.Service.API.DTO.Requests
 {
     public class PullRequestData : BaseQueryData
     {
@@ -8,6 +8,6 @@
 
         public string ProjectName { get; set; }
 
-        public int PullRequestId { get; set; }
+        public int Id { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Moq;
 using REBUSS.GitDaif.Service.API.Git.Model;
 using REBUSS.GitDaif.Service.API.Git;
+using REBUSS.GitDaif.Service.API.DTO.Requests;
 
 namespace REBUSS.GitDaif.Service.API.UnitTests.Git
 {
@@ -22,9 +23,6 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             _gitClientMock = new Mock<IGitClient>();
 
             _configurationMock.Setup(config => config[ConfigConsts.PersonalAccessTokenKey]).Returns("testToken");
-            _configurationMock.Setup(config => config[ConfigConsts.OrganizationNameKey]).Returns("testOrg");
-            _configurationMock.Setup(config => config[ConfigConsts.ProjectNameKey]).Returns("testProject");
-            _configurationMock.Setup(config => config[ConfigConsts.RepositoryNameKey]).Returns("testRepo");
             _configurationMock.Setup(config => config[ConfigConsts.LocalRepoPathKey]).Returns("testPath");
 
             _gitService = new GitService(_configurationMock.Object, _gitClientMock.Object);
@@ -294,11 +292,11 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             mockBranch.Setup(b => b.Commits).Returns(mockCommitLog.Object);
             mockCommitLog.Setup(cl => cl.GetEnumerator()).Returns(new List<Commit> { mockCommit.Object }.GetEnumerator());
             mockRepository.Setup(r => r.Branches[$"refs/remotes/origin/{branchName}"]).Returns(mockBranch.Object);
-
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(id)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/main" });
+            var prData = GetPullRequestData();
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/main" });
 
             // Act
-            var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
+            var result = await _gitService.IsLatestCommitIncludedInDiff(prData, diffContent, mockRepository.Object);
 
             // Assert
             Assert.That(result, Is.True);
@@ -322,11 +320,11 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             mockBranch.Setup(b => b.Commits).Returns(mockCommitLog.Object);
             mockCommitLog.Setup(cl => cl.GetEnumerator()).Returns(new List<Commit> { mockCommit.Object }.GetEnumerator());
             mockRepository.Setup(r => r.Branches[branchName]).Returns(mockBranch.Object);
-
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(id)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/main" });
+            var prData = GetPullRequestData();
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/main" });
 
             // Act
-            var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
+            var result = await _gitService.IsLatestCommitIncludedInDiff(prData, diffContent, mockRepository.Object);
 
             // Assert
             Assert.That(result, Is.False);
@@ -343,11 +341,11 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             var mockRepository = new Mock<IRepository>();
 
             mockRepository.Setup(r => r.Branches[branchName]).Returns((Branch)null);
-
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(id)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/nonexistent-branch" });
+            var prData = GetPullRequestData();
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/nonexistent-branch" });
 
             // Act
-            var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
+            var result = await _gitService.IsLatestCommitIncludedInDiff(prData, diffContent, mockRepository.Object);
 
             // Assert
             Assert.That(result, Is.False);
@@ -373,11 +371,11 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             mockBranch.Setup(b => b.Commits).Returns(mockCommitLog.Object);
             mockCommitLog.Setup(cl => cl.GetEnumerator()).Returns(new List<Commit> { mockCommit.Object }.GetEnumerator());
             mockRepository.Setup(r => r.Branches[$"refs/remotes/origin/{branchName}"]).Returns(mockBranch.Object);
-
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(id)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/main" });
+            var prData = GetPullRequestData();
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/main" });
 
             // Act
-            var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
+            var result = await _gitService.IsLatestCommitIncludedInDiff(prData, diffContent, mockRepository.Object);
 
             // Assert
             Assert.That(result, Is.True);
@@ -401,11 +399,11 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             mockBranch.Setup(b => b.Commits).Returns(mockCommitLog.Object);
             mockCommitLog.Setup(cl => cl.GetEnumerator()).Returns(new List<Commit> { mockCommit.Object }.GetEnumerator());
             mockRepository.Setup(r => r.Branches[branchName]).Returns(mockBranch.Object);
-
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(id)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/main" });
+            var prData = GetPullRequestData();
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(new GitPullRequest { SourceRefName = "refs/heads/main" });
 
             // Act
-            var result = await _gitService.IsLatestCommitIncludedInDiff(id, diffContent, mockRepository.Object);
+            var result = await _gitService.IsLatestCommitIncludedInDiff(prData, diffContent, mockRepository.Object);
 
             // Assert
             Assert.That(result, Is.False);
@@ -421,11 +419,11 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             {
                 SourceRefName = "refs/heads/feature-branch"
             };
-
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(pullRequestId)).ReturnsAsync(pullRequest);
+            var prData = GetPullRequestData();
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(pullRequest);
 
             // Act
-            var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
+            var result = await _gitService.GetBranchNameForPullRequest(prData);
 
             // Assert
             Assert.That(result, Is.EqualTo(expectedBranchName));
@@ -436,12 +434,12 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
         {
             // Arrange
             var pullRequestId = 1;
-
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(pullRequestId)).ReturnsAsync(() => null);
+            var prData = GetPullRequestData();
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(() => null);
             _gitService.GitClient = _gitClientMock.Object;
 
             // Act
-            var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
+            var result = await _gitService.GetBranchNameForPullRequest(prData);
 
             // Assert
             Assert.That(result, Is.Null);
@@ -456,11 +454,11 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             {
                 SourceRefName = null
             };
-
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(pullRequestId)).ReturnsAsync(pullRequest);
+            var prData = GetPullRequestData();
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(pullRequest);
 
             // Act
-            var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
+            var result = await _gitService.GetBranchNameForPullRequest(prData);
 
             // Assert
             Assert.That(result, Is.Null);
@@ -475,11 +473,12 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
             {
                 SourceRefName = string.Empty
             };
+            var prData = GetPullRequestData();
 
-            _gitClientMock.Setup(g => g.GetPullRequestAsync(pullRequestId)).ReturnsAsync(pullRequest);
+            _gitClientMock.Setup(g => g.GetPullRequestAsync(prData)).ReturnsAsync(pullRequest);
 
             // Act
-            var result = await _gitService.GetBranchNameForPullRequest(pullRequestId);
+            var result = await _gitService.GetBranchNameForPullRequest(prData);
 
             // Assert
             Assert.That(result, Is.Empty);
@@ -535,6 +534,17 @@ namespace REBUSS.GitDaif.Service.API.UnitTests.Git
 
             // Assert
             Assert.That(result, Is.Empty);
+        }
+
+        private PullRequestData GetPullRequestData()
+        {
+            return new PullRequestData
+            {
+                OrganizationName = "REBUSS",
+                ProjectName = "REBUSS",
+                RepositoryName = "REBUSS",
+                Id = 1
+            };
         }
     }
 }

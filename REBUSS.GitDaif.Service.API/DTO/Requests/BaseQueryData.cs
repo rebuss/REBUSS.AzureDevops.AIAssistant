@@ -1,4 +1,4 @@
-﻿namespace REBUSS.GitDaif.Service.API.DTO
+﻿namespace REBUSS.GitDaif.Service.API.DTO.Requests
 {
     public class BaseQueryData
     {

@@ -3,7 +3,7 @@ using GitDaif.ServiceAPI.Agents;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Mvc;
 using REBUSS.GitDaif.Service.API.Agents;
-using REBUSS.GitDaif.Service.API.DTO;
+using REBUSS.GitDaif.Service.API.DTO.Requests;
 using REBUSS.GitDaif.Service.API.Git;
 
 namespace REBUSS.GitDaif.Service.Controllers
@@ -39,13 +39,13 @@ namespace REBUSS.GitDaif.Service.Controllers
             {
                 using (var repo = new Repository(localRepoPath))
                 {
-                    var diffContent = await gitService.GetPullRequestDiffContent(data.PullRequestId, repo);
+                    var diffContent = await gitService.GetPullRequestDiffContent(data, repo);
                     return Content(diffContent);
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while getting the diff file for pull request {PullRequestId}", data.PullRequestId);
+                logger.LogError(ex, "An error occurred while getting the diff file for pull request {PullRequestId}", data.Id);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -55,11 +55,11 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
-                return await ProcessPullRequest(data.PullRequestId, "Prompts/SummarizePullRequest.txt");
+                return await ProcessPullRequest(data, "Prompts/SummarizePullRequest.txt");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while summarizing the pull request {PullRequestId}", data.PullRequestId);
+                logger.LogError(ex, "An error occurred while summarizing the pull request {PullRequestId}", data.Id);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -69,11 +69,11 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
-                return await ProcessPullRequest(data.PullRequestId, "Prompts/PullRequestReview.txt");
+                return await ProcessPullRequest(data, "Prompts/PullRequestReview.txt");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while reviewing the pull request {PullRequestId}", data.PullRequestId);
+                logger.LogError(ex, "An error occurred while reviewing the pull request {PullRequestId}", data.Id);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -117,10 +117,10 @@ namespace REBUSS.GitDaif.Service.Controllers
                     var diffFile = GetLatestReviewFile(fileName);
                     string diffContent = System.IO.File.Exists(diffFile) ? System.IO.File.ReadAllText(diffFile) : string.Empty;
 
-                    if (string.IsNullOrEmpty(diffContent) || !await gitService.IsLatestCommitIncludedInDiff(data.PullRequestId, diffContent, repo))
+                    if (string.IsNullOrEmpty(diffContent) || !await gitService.IsLatestCommitIncludedInDiff(data, diffContent, repo))
                     {
-                        diffContent = await gitService.GetFullDiffFileFor(repo, data.PullRequestId, fileName);
-                        diffFile = await SaveDiffContentToFile(diffContent, $"{data.PullRequestId}_FileReview_{fileName}");
+                        diffContent = await gitService.GetFullDiffFileFor(repo, data, fileName);
+                        diffFile = await SaveDiffContentToFile(diffContent, $"{data.Id}_FileReview_{fileName}");
                     }
 
                     return await ReviewSingleFile(diffFile);
@@ -128,7 +128,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while reviewing the single file {FilePath} for pull request {PullRequestId}", data.FilePath, data.PullRequestId);
+                logger.LogError(ex, "An error occurred while reviewing the single file {FilePath} for pull request {PullRequestId}", data.FilePath, data.Id);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
@@ -172,16 +172,16 @@ namespace REBUSS.GitDaif.Service.Controllers
             return fullDiffFilePath;
         }
 
-        private async Task<IActionResult> ProcessPullRequest(int id, string promptFilePath)
+        private async Task<IActionResult> ProcessPullRequest(PullRequestData prData, string promptFilePath)
         {
-            var diffFile = GetLatestReviewFile(id);
+            var diffFile = GetLatestReviewFile(prData.Id);
             string diffContent = string.Empty;
             using (var repo = new Repository(localRepoPath))
             {
-                if (string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(id, diffFile, repo))
+                if (string.IsNullOrEmpty(diffFile) || !await gitService.IsLatestCommitIncludedInDiff(prData, diffFile, repo))
                 {
-                    diffContent = await gitService.GetPullRequestDiffContent(id, repo);
-                    string fileName = Path.Combine(diffFilesDirectory, $"{id}_Review_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
+                    diffContent = await gitService.GetPullRequestDiffContent(prData, repo);
+                    string fileName = Path.Combine(diffFilesDirectory, $"{prData.Id}_Review_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
                     await System.IO.File.WriteAllTextAsync(fileName, diffContent);
                 }
             }

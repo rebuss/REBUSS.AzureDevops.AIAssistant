@@ -26,8 +26,11 @@
 	</AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
-    <Content Update="appsettings.Local.json">
+    <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DTO\Responses\" />
   </ItemGroup>
 </Project>

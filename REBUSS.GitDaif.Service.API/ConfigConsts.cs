@@ -2,9 +2,6 @@
 {
     public class ConfigConsts
     {
-        public const string RepositoryNameKey = "GitDaif.Service:RepositoryName";
-        public const string ProjectNameKey = "GitDaif.Service:ProjectName";
-        public const string OrganizationNameKey = "GitDaif.Service:Organization";
         public const string PersonalAccessTokenKey = "GitDaif.Service:PersonalAccessToken";
         public const string LocalRepoPathKey = "GitDaif.Service:LocalRepoPath";
         public const string DiffFilesDirectory = "GitDaif.Service:DiffFilesDirectory";

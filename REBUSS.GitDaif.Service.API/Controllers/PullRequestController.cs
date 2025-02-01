@@ -3,6 +3,7 @@ using GitDaif.ServiceAPI.Agents;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Mvc;
 using REBUSS.GitDaif.Service.API.Agents;
+using REBUSS.GitDaif.Service.API.DTO;
 using REBUSS.GitDaif.Service.API.Git;
 
 namespace REBUSS.GitDaif.Service.Controllers
@@ -32,53 +33,53 @@ namespace REBUSS.GitDaif.Service.Controllers
         }
 
         [HttpPost("GetDiffFile")]
-        public async Task<IActionResult> GetDiffFile(int id)
+        public async Task<IActionResult> GetDiffFile([FromBody] PullRequestData data)
         {
             try
             {
                 using (var repo = new Repository(localRepoPath))
                 {
-                    var diffContent = await gitService.GetPullRequestDiffContent(id, repo);
+                    var diffContent = await gitService.GetPullRequestDiffContent(data.PullRequestId, repo);
                     return Content(diffContent);
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while getting the diff file for pull request {PullRequestId}", id);
+                logger.LogError(ex, "An error occurred while getting the diff file for pull request {PullRequestId}", data.PullRequestId);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
 
         [HttpPost("Summarize")]
-        public async Task<IActionResult> Summarize(int id)
+        public async Task<IActionResult> Summarize([FromBody] PullRequestData data)
         {
             try
             {
-                return await ProcessPullRequest(id, "Prompts/SummarizePullRequest.txt");
+                return await ProcessPullRequest(data.PullRequestId, "Prompts/SummarizePullRequest.txt");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while summarizing the pull request {PullRequestId}", id);
+                logger.LogError(ex, "An error occurred while summarizing the pull request {PullRequestId}", data.PullRequestId);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
 
         [HttpPost("Review")]
-        public async Task<IActionResult> Review(int id)
+        public async Task<IActionResult> Review([FromBody] PullRequestData data)
         {
             try
             {
-                return await ProcessPullRequest(id, "Prompts/PullRequestReview.txt");
+                return await ProcessPullRequest(data.PullRequestId, "Prompts/PullRequestReview.txt");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while reviewing the pull request {PullRequestId}", id);
+                logger.LogError(ex, "An error occurred while reviewing the pull request {PullRequestId}", data.PullRequestId);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
 
         [HttpPost("SummarizeLocalChanges")]
-        public async Task<IActionResult> SummarizeLocalChanges()
+        public async Task<IActionResult> SummarizeLocalChanges([FromBody] BaseQueryData data)
         {
             try
             {
@@ -92,7 +93,7 @@ namespace REBUSS.GitDaif.Service.Controllers
         }
 
         [HttpPost("ReviewLocalChanges")]
-        public async Task<IActionResult> ReviewLocalChanges()
+        public async Task<IActionResult> ReviewLocalChanges([FromBody] BaseQueryData data)
         {
             try
             {
@@ -106,20 +107,20 @@ namespace REBUSS.GitDaif.Service.Controllers
         }
 
         [HttpPost("ReviewSingleFile")]
-        public async Task<IActionResult> ReviewSingleFile(int id, string filePath)
+        public async Task<IActionResult> ReviewSingleFile([FromBody] FileReviewData data)
         {
             try
             {
                 using (var repo = new Repository(localRepoPath))
                 {
-                    var fileName = FormatFileName(filePath);
+                    var fileName = FormatFileName(data.FilePath);
                     var diffFile = GetLatestReviewFile(fileName);
                     string diffContent = System.IO.File.Exists(diffFile) ? System.IO.File.ReadAllText(diffFile) : string.Empty;
 
-                    if (string.IsNullOrEmpty(diffContent) || !await gitService.IsLatestCommitIncludedInDiff(id, diffContent, repo))
+                    if (string.IsNullOrEmpty(diffContent) || !await gitService.IsLatestCommitIncludedInDiff(data.PullRequestId, diffContent, repo))
                     {
-                        diffContent = await gitService.GetFullDiffFileFor(repo, id, fileName);
-                        diffFile = await SaveDiffContentToFile(diffContent, $"{id}_FileReview_{fileName}");
+                        diffContent = await gitService.GetFullDiffFileFor(repo, data.PullRequestId, fileName);
+                        diffFile = await SaveDiffContentToFile(diffContent, $"{data.PullRequestId}_FileReview_{fileName}");
                     }
 
                     return await ReviewSingleFile(diffFile);
@@ -127,27 +128,27 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while reviewing the single file {FilePath} for pull request {PullRequestId}", filePath, id);
+                logger.LogError(ex, "An error occurred while reviewing the single file {FilePath} for pull request {PullRequestId}", data.FilePath, data.PullRequestId);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }
 
         [HttpPost("ReviewSingleLocalFile")]
-        public async Task<IActionResult> ReviewSingleLocalFile(string filePath)
+        public async Task<IActionResult> ReviewSingleLocalFile([FromBody] LocalFileReviewData data)
         {
             try
             {
                 using (var repo = new Repository(localRepoPath))
                 {
-                    var fileName = FormatFileName(filePath);
-                    var diffContent = await gitService.GetFullDiffFileForLocal(repo, filePath);
+                    var fileName = FormatFileName(data.FilePath);
+                    var diffContent = await gitService.GetFullDiffFileForLocal(repo, data.FilePath);
                     var diffFile = await SaveDiffContentToFile(diffContent, $"LocalFileReview_{fileName}");
                     return await ReviewSingleFile(diffFile);
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while reviewing the single local file {FilePath}", filePath);
+                logger.LogError(ex, "An error occurred while reviewing the single local file {FilePath}", data.FilePath);
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while processing your request.");
             }
         }

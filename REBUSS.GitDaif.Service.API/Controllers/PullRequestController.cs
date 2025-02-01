@@ -2,6 +2,7 @@
 using GitDaif.ServiceAPI.Agents;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Mvc;
+using REBUSS.GitDaif.Service.API;
 using REBUSS.GitDaif.Service.API.Agents;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
 using REBUSS.GitDaif.Service.API.DTO.Responses;
@@ -38,6 +39,11 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
+                if(!Validation.IsPullRequestDataOk(data))
+                {
+                    return BadRequest("Invalid pull request data.");
+                }
+
                 using (var repo = new Repository(localRepoPath))
                 {
                     var diffContent = await gitService.GetPullRequestDiffContent(data, repo);
@@ -56,6 +62,11 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
+                if (!Validation.IsPullRequestDataOk(data))
+                {
+                    return BadRequest("Invalid pull request data.");
+                }
+
                 PreProcessPullRequestData(data, "Prompts/SummarizePullRequest.txt");
                 return await ProcessPullRequest(data);
             }
@@ -71,6 +82,11 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
+                if (!Validation.IsPullRequestDataOk(data))
+                {
+                    return BadRequest("Invalid pull request data.");
+                }
+
                 PreProcessPullRequestData(data, "Prompts/PullRequestReview.txt");
                 return await ProcessPullRequest(data);
             }
@@ -116,6 +132,11 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
+                if (!Validation.IsFileReviewDataOk(data))
+                {
+                    return BadRequest("Invalid file review data.");
+                }
+
                 using (var repo = new Repository(localRepoPath))
                 {
                     var fileName = FormatFileName(data.FilePath);
@@ -144,6 +165,11 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             try
             {
+                if (!Validation.IsLocalFileReviewDataOk(data))
+                {
+                    return BadRequest("Invalid local file review data.");
+                }
+
                 using (var repo = new Repository(localRepoPath))
                 {
                     var fileName = FormatFileName(data.FilePath);

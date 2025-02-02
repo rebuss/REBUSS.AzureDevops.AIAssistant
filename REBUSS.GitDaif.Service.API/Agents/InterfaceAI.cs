@@ -1,6 +1,6 @@
 ﻿using REBUSS.GitDaif.Service.API.DTO.Responses;
 
-namespace GitDaif.ServiceAPI.Agents
+namespace REBUSS.GitDaif.Service.API.Agents
 {
     public interface InterfaceAI
     {

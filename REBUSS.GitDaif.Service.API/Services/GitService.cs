@@ -3,6 +3,7 @@ using LibGit2Sharp;
 using Microsoft.Extensions.Options;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
+using REBUSS.GitDaif.Service.API.Properties;
 using REBUSS.GitDaif.Service.API.Services.Model;
 using System.Text;
 
@@ -52,6 +53,7 @@ namespace REBUSS.GitDaif.Service.API.Services
                     }
                 }
 
+                logger.LogInformation("Successfully retrieved diff content.");
                 return diffContent.ToString();
             }
             catch (Exception ex)
@@ -187,7 +189,7 @@ namespace REBUSS.GitDaif.Service.API.Services
                     ExtractBranchNameFromRef(pullRequest.TargetRefName),
                     ExtractBranchNameFromRef(pullRequest.SourceRefName)
                 };
-
+                logger.LogInformation($"Getting diff content for PR {prData.Id}");
                 return await GetDiffContentForChanges(changes, pullRequest);
             }
             catch (Exception ex)

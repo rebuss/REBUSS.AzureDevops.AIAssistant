@@ -3,6 +3,7 @@ using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
+using REBUSS.GitDaif.Service.API.Properties;
 using REBUSS.GitDaif.Service.API.Services;
 
 namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
@@ -98,9 +99,9 @@ namespace REBUSS.GitDaif.Service.API.IntegrationTests.Git
 
             return new AppSettings()
             {
-                DiffFilesDirectory = config[ConfigConsts.DiffFilesDirectory],
-                LocalRepoPath = config[ConfigConsts.LocalRepoPathKey],
-                PersonalAccessToken = config[ConfigConsts.PersonalAccessTokenKey]
+                DiffFilesDirectory = config["DiffFilesDirectory"],
+                LocalRepoPath = config["LocalRepoPath"],
+                PersonalAccessToken = config["PersonalAccessToken"]
             };
         }
 

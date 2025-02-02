@@ -27,8 +27,8 @@ namespace REBUSS.GitDaif.Service.API.Agents.Helpers
                 var nodeIdAttr = node.Node.Attributes.Contains("id") ? node.Node.Attributes[Array.IndexOf(node.Node.Attributes, "id") + 1] : "null";
                 var nodeClassAttr = node.Node.Attributes.Contains("class") ? node.Node.Attributes[Array.IndexOf(node.Node.Attributes, "class") + 1] : "null";
                 var nodeRoleAttr = node.Node.Attributes.Contains("role") ? node.Node.Attributes[Array.IndexOf(node.Node.Attributes, "role") + 1] : "null";
-
-                Console.WriteLine($"Type: {nodeName}, ID: {nodeIdAttr}, Class: {nodeClassAttr}, Role: {nodeRoleAttr}");
+                var nodeTypeAttr = node.Node.Attributes.Contains("type") ? node.Node.Attributes[Array.IndexOf(node.Node.Attributes, "type") + 1] : "null";
+                Console.WriteLine($"Type: {nodeName}, ID: {nodeIdAttr}, Class: {nodeClassAttr}, Role: {nodeRoleAttr}, Type: {nodeTypeAttr}");
             }
         }
     }

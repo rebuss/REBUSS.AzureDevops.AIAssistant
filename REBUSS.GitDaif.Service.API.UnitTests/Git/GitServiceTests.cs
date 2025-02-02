@@ -2,6 +2,7 @@
 using Microsoft.TeamFoundation.SourceControl.WebApi;
 using Moq;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
+using REBUSS.GitDaif.Service.API.Properties;
 using REBUSS.GitDaif.Service.API.Services;
 using REBUSS.GitDaif.Service.API.Services.Model;
 

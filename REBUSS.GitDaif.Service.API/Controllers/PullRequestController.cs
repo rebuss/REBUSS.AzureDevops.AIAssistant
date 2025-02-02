@@ -1,5 +1,4 @@
 ﻿using GitDaif.ServiceAPI;
-using GitDaif.ServiceAPI.Agents;
 using LibGit2Sharp;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -7,6 +6,7 @@ using REBUSS.GitDaif.Service.API;
 using REBUSS.GitDaif.Service.API.Agents;
 using REBUSS.GitDaif.Service.API.DTO.Requests;
 using REBUSS.GitDaif.Service.API.DTO.Responses;
+using REBUSS.GitDaif.Service.API.Properties;
 using REBUSS.GitDaif.Service.API.Services;
 
 namespace REBUSS.GitDaif.Service.Controllers
@@ -21,10 +21,13 @@ namespace REBUSS.GitDaif.Service.Controllers
         private readonly InterfaceAI aiAgent;
         private readonly ILogger<PullRequestController> logger;
 
-        public PullRequestController(IOptions<AppSettings> settings, ILogger<PullRequestController> logger, IConfiguration config)
+        public PullRequestController(IOptions<AppSettings> settings, 
+                                     ILogger<PullRequestController> logger,
+                                     InterfaceAI agent,
+                                     GitService gitService)
         {
-            gitService = new GitService(settings.Value);
-            aiAgent = new BrowserCopilotForEnterprise(config);
+            this.gitService = gitService;
+            aiAgent = agent;
             diffFilesDirectory = settings.Value.DiffFilesDirectory ?? throw new ArgumentNullException(nameof(diffFilesDirectory));
             localRepoPath = settings.Value.LocalRepoPath ?? throw new ArgumentNullException(nameof(localRepoPath));
             this.logger = logger;
@@ -143,6 +146,7 @@ namespace REBUSS.GitDaif.Service.Controllers
                     {
                         diffContent = await gitService.GetFullDiffFileFor(repo, data, fileName);
                         diffFile = await SaveDiffContentToFile(diffContent, $"{data.Id}_FileReview_{fileName}");
+                        logger.LogInformation($"Saved diff file to: {diffFile}");
                     }
 
                     PreProcessPullRequestData(data, "Prompts/ReviewSingleFile.txt");
@@ -171,6 +175,7 @@ namespace REBUSS.GitDaif.Service.Controllers
                     var fileName = FormatFileName(data.FilePath);
                     var diffContent = await gitService.GetFullDiffFileForLocal(repo, data.FilePath);
                     var diffFile = await SaveDiffContentToFile(diffContent, $"LocalFileReview_{fileName}");
+                    logger.LogInformation($"Saved diff file to: {diffFile}");
                     PreProcessPullRequestData(data, "Prompts/ReviewSingleFile.txt");
                     return await ReviewSingleFile(diffFile, data.Query);
                 }
@@ -185,6 +190,7 @@ namespace REBUSS.GitDaif.Service.Controllers
         private async Task<IActionResult> ReviewSingleFile(string diffFilePath, string prompt)
         {
             var result = await aiAgent.AskAgent(prompt, diffFilePath);
+            logger.LogInformation("Got AI agent response.");
             return Ok(result);
         }
 
@@ -197,6 +203,7 @@ namespace REBUSS.GitDaif.Service.Controllers
         {
             string fullDiffFilePath = Path.Combine(diffFilesDirectory, $"{fileName}_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
             await System.IO.File.WriteAllTextAsync(fullDiffFilePath, diffContent);
+            logger.LogInformation($"Saved diff file to: {fullDiffFilePath}");
             return fullDiffFilePath;
         }
 
@@ -215,7 +222,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             }
 
             var result = await aiAgent.AskAgent(prData.Query, diffFile);
-
+            logger.LogInformation("Got AI agent response.");
             return Ok(result);
         }
 
@@ -225,7 +232,7 @@ namespace REBUSS.GitDaif.Service.Controllers
             string fileName = Path.Combine(diffFilesDirectory, $"LocalReview_{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.diff.txt");
             await System.IO.File.WriteAllTextAsync(fileName, diffContent);
             var result = await aiAgent.AskAgent(prompt, fileName);
-
+            logger.LogInformation("Got AI agent response.");
             return Ok(result);
         }
 

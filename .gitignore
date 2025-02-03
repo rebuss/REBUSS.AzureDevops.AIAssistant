@@ -9,3 +9,4 @@ REBUSS.AzureDevOps.PullRequestAPI.IntegrationTests/appsettings.Local.json
 REBUSS.GitDaif.Service.API/appsettings.Local.json
 REBUSS.GitDaif.Service.API.IntegrationTests/appsettings.Local.json
 REBUSS.GitDaif.Service.API.IntegrationTests/appsettings.test.json
+REBUSS.AzureDevops.EdgeExt/node_modules/

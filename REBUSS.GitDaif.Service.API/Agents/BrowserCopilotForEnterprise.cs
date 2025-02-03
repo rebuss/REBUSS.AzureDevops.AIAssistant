@@ -114,7 +114,7 @@ namespace REBUSS.GitDaif.Service.API.Agents
                 Headless = false,
                 ExecutablePath = microsoftEdgePath,
                 UserDataDir = userDataDir,
-                Args = new[] { "--window-size=640,480" }
+                Args = new[] { "--window-size=800,600" }
             });
         }
 

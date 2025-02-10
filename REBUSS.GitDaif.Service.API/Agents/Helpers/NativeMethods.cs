@@ -18,6 +18,9 @@ namespace REBUSS.GitDaif.Service.API.Agents.Helpers
         public static extern int SendMessage(nint hWnd, int Msg, nint wParam, string IParam);
 
         [DllImport("user32.dll", SetLastError = true)]
+        public static extern nint SendMessage(nint hWnd, uint Msg, nint wParam, nint lParam);
+
+        [DllImport("user32.dll", SetLastError = true)]
         public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, nuint dwExtraInfo);
 
         [DllImport("user32.dll")]
@@ -56,6 +59,9 @@ namespace REBUSS.GitDaif.Service.API.Agents.Helpers
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern IntPtr GlobalFree(IntPtr hMem);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int GetWindowText(nint hWnd, StringBuilder lpString, int nMaxCount);
+
         private const uint CF_UNICODETEXT = 13;
         private const uint GMEM_MOVEABLE = 0x0002;
 
@@ -64,6 +70,7 @@ namespace REBUSS.GitDaif.Service.API.Agents.Helpers
         public const uint KEYEVENTF_KEYDOWN = 0x00000; // Key pressed
         public const uint KEYEVENTF_KEYUP = 0x0002;
         public const int WM_SETTEXT = 0x000C;
+        public const uint BM_CLICK = 0x00F5;
 
         public static nint FindControlByClass(nint hWndParent, string className)
         {
@@ -73,6 +80,24 @@ namespace REBUSS.GitDaif.Service.API.Agents.Helpers
                 StringBuilder classBuilder = new StringBuilder(256);
                 GetClassName(hWnd, classBuilder, classBuilder.Capacity);
                 if (classBuilder.ToString() == className)
+                {
+                    result = hWnd;
+                    return false;
+                }
+                return true;
+            }, nint.Zero);
+
+            return result;
+        }
+
+        public static nint FindControlByText(nint hWndParent, string buttonText)
+        {
+            nint result = nint.Zero;
+            EnumChildWindows(hWndParent, (hWnd, IParam) =>
+            {
+                StringBuilder textBuilder = new StringBuilder(256);
+                GetWindowText(hWnd, textBuilder, textBuilder.Capacity);
+                if (textBuilder.ToString() == buttonText)
                 {
                     result = hWnd;
                     return false;

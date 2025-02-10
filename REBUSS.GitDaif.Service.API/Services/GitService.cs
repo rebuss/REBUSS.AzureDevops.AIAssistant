@@ -1,4 +1,3 @@
-using GitDaif.ServiceAPI;
 using LibGit2Sharp;
 using Microsoft.Extensions.Options;
 using Microsoft.TeamFoundation.SourceControl.WebApi;
@@ -48,17 +47,17 @@ namespace REBUSS.GitDaif.Service.API.Services
                         string remoteCommitId = pullRequest.LastMergeTargetCommit.CommitId;
                         string filePath = gitItem.Path;
 
-                        string result = await GetGitDiffAsync(remoteCommitId, localCommitId, filePath);
+                        string result = await GetGitDiffAsync(pullRequest, filePath);
                         diffContent.Append(result);
                     }
                 }
 
-                logger.LogInformation("Successfully retrieved diff content.");
+                logger?.LogInformation("Successfully retrieved diff content.");
                 return diffContent.ToString();
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while getting diff content for changes.");
+                logger?.LogError(ex, "An error occurred while getting diff content for changes.");
                 throw;
             }
         }
@@ -84,7 +83,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while extracting modified file name from diff content.");
+                logger?.LogError(ex, "An error occurred while extracting modified file name from diff content.");
                 throw;
             }
         }
@@ -102,11 +101,11 @@ namespace REBUSS.GitDaif.Service.API.Services
 
                 var commit1 = await GetLatestCommitHashForFile(fileName, branchNames[0], repo);
                 var commit2 = await GetLatestCommitHashForFile(fileName, branchNames[1], repo);
-                return await GetGitDiffAsync(commit1, commit2, fileName, true);
+                return await GetGitDiffAsync(pullRequest, fileName, true);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while getting full diff file for pull request {prData.Id} and file {fileName}.");
+                logger?.LogError(ex, $"An error occurred while getting full diff file for pull request {prData.Id} and file {fileName}.");
                 throw;
             }
         }
@@ -126,7 +125,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while getting full diff file for local file {filePath}.");
+                logger?.LogError(ex, $"An error occurred while getting full diff file for local file {filePath}.");
                 throw;
             }
         }
@@ -154,7 +153,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while getting latest commit hash for file {filePath} in branch {branchName}.");
+                logger?.LogError(ex, $"An error occurred while getting latest commit hash for file {filePath} in branch {branchName}.");
                 throw;
             }
         }
@@ -171,7 +170,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while getting local changes diff content.");
+                logger?.LogError(ex, "An error occurred while getting local changes diff content.");
                 throw;
             }
         }
@@ -181,6 +180,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             try
             {
                 var pullRequest = await GitClient.GetPullRequestAsync(prData);
+                FetchBranches(repo as Repository, pullRequest);
                 var lastIteration = await GitClient.GetLastIterationAsync(prData);
                 var changes = await GitClient.GetIterationChangesAsync(prData, lastIteration.Id.Value);
 
@@ -189,12 +189,12 @@ namespace REBUSS.GitDaif.Service.API.Services
                     ExtractBranchNameFromRef(pullRequest.TargetRefName),
                     ExtractBranchNameFromRef(pullRequest.SourceRefName)
                 };
-                logger.LogInformation($"Getting diff content for PR {prData.Id}");
+                logger?.LogInformation($"Getting diff content for PR {prData.Id}");
                 return await GetDiffContentForChanges(changes, pullRequest);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while getting diff content for pull request {prData.Id}.");
+                logger?.LogError(ex, $"An error occurred while getting diff content for pull request {prData.Id}.");
                 throw;
             }
         }
@@ -208,7 +208,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while checking if diff file contains changes in multiple files.");
+                logger?.LogError(ex, "An error occurred while checking if diff file contains changes in multiple files.");
                 throw;
             }
         }
@@ -222,7 +222,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while checking if the latest commit is included in diff for branch {branchName}.");
+                logger?.LogError(ex, $"An error occurred while checking if the latest commit is included in diff for branch {branchName}.");
                 throw;
             }
         }
@@ -240,9 +240,33 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while checking if the latest commit is included in diff for pull request {prData.Id}.");
+                logger?.LogError(ex, $"An error occurred while checking if the latest commit is included in diff for pull request {prData.Id}.");
                 throw;
             }
+        }
+
+        public void FetchBranches(Repository repo, GitPullRequest pullRequest)
+        {
+            var remote = repo.Network.Remotes["origin"];
+            var fetchOptions = new FetchOptions
+            {
+                CredentialsProvider = (url, usernameFromUrl, types) =>
+                    new UsernamePasswordCredentials
+                    {
+                        Username = string.Empty,
+                        Password = personalAccessToken
+                    }
+            };
+
+            Commands.Fetch(
+                repo,
+                remote.Name,
+                new[] {
+                        ExtractBranchNameFromRef(pullRequest.TargetRefName),
+                        ExtractBranchNameFromRef(pullRequest.SourceRefName)
+                },
+                fetchOptions,
+                null);
         }
 
         internal string ExtractBranchNameFromRef(string refName)
@@ -253,7 +277,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while extracting branch name from ref {refName}.");
+                logger?.LogError(ex, $"An error occurred while extracting branch name from ref {refName}.");
                 throw;
             }
         }
@@ -272,11 +296,46 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while getting branch name for pull request {prData.Id}.");
+                logger?.LogError(ex, $"An error occurred while getting branch name for pull request {prData.Id}.");
                 throw;
             }
         }
 
+        internal async Task<string> GetGitDiffAsync(GitPullRequest pullRequest, string filePath, bool full = false)
+        {
+            string localCommitId = pullRequest.LastMergeSourceCommit.CommitId;
+            string remoteCommitId = pullRequest.LastMergeTargetCommit.CommitId;
+            try
+            {
+                using (var repo = new Repository(localRepoPath))
+                {
+                    FetchBranches(repo, pullRequest);
+                    var remoteCommit = repo.Lookup<Commit>(remoteCommitId);
+                    var localCommit = repo.Lookup<Commit>(localCommitId);
+
+                    if (remoteCommit == null || localCommit == null)
+                    {
+                        throw new ArgumentException("Invalid commit ID(s) provided.");
+                    }
+
+                    var diffOptions = new CompareOptions
+                    {
+                        IncludeUnmodified = false,
+                        ContextLines = full ? 999999 : 3
+                    };
+
+                    var changes = repo.Diff.Compare<Patch>(remoteCommit.Tree, localCommit.Tree, new[] { PrepareFilePath(filePath) }, diffOptions);
+                    return await Task.FromResult(changes.Content);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, $"An error occurred while getting git diff for file {filePath} between commits {remoteCommitId} and {localCommitId}.");
+                throw;
+            }
+        }
+
+        // TODO
         internal async Task<string> GetGitDiffAsync(string remoteCommitId, string localCommitId, string filePath, bool full = false)
         {
             try
@@ -303,7 +362,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while getting git diff for file {filePath} between commits {remoteCommitId} and {localCommitId}.");
+                logger?.LogError(ex, $"An error occurred while getting git diff for file {filePath} between commits {remoteCommitId} and {localCommitId}.");
                 throw;
             }
         }
@@ -323,7 +382,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while getting latest commit hash for branch {branchName}.");
+                logger?.LogError(ex, $"An error occurred while getting latest commit hash for branch {branchName}.");
                 throw;
             }
         }
@@ -346,7 +405,7 @@ namespace REBUSS.GitDaif.Service.API.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"An error occurred while preparing file path {filePath}.");
+                logger?.LogError(ex, $"An error occurred while preparing file path {filePath}.");
                 throw;
             }
         }

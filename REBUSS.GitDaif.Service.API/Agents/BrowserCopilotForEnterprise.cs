@@ -81,7 +81,7 @@ namespace REBUSS.GitDaif.Service.API.Agents
                     Message = text
                 };
 
-                await browser.CloseAsync();
+                //await browser.CloseAsync();
                 return response;
             }
             catch (Exception ex)
@@ -114,7 +114,7 @@ namespace REBUSS.GitDaif.Service.API.Agents
                 Headless = false,
                 ExecutablePath = microsoftEdgePath,
                 UserDataDir = userDataDir,
-                Args = new[] { "--window-size=800,600" }
+                Args = new[] { "--start-maximized" }
             });
         }
 
@@ -230,6 +230,12 @@ namespace REBUSS.GitDaif.Service.API.Agents
                 return;
             }
 
+            nint openButtonHandle = NativeMethods.FindControlByText(hWndMain, "Open");
+            if (openButtonHandle != nint.Zero)
+            {
+                NativeMethods.SendMessage(openButtonHandle, NativeMethods.BM_CLICK, nint.Zero, nint.Zero);
+            }
+
             NativeMethods.SendMessage(hWndEdit, NativeMethods.WM_SETTEXT, nint.Zero, filePath);
             NativeMethods.keybd_event(NativeMethods.VK_RETURN, 0, NativeMethods.KEYEVENTF_KEYDOWN, nuint.Zero);
             NativeMethods.keybd_event(NativeMethods.VK_RETURN, 0, NativeMethods.KEYEVENTF_KEYUP, nuint.Zero);
@@ -254,18 +260,7 @@ namespace REBUSS.GitDaif.Service.API.Agents
 
         private async Task<IFrame> GetCopilotIframe(IPage page)
         {
-            var iframes = page.Frames;
-            foreach (var iframe in iframes)
-            {
-                var title = await iframe.EvaluateFunctionAsync<string>("() => document.title");
-                if (title == "Copilot")
-                {
-                    logger.LogInformation("Iframe with title 'Copilot' was found.");
-                    return iframe;
-                }
-            }
-
-            throw new NotFoundException("Iframe with title 'Copilot' was not found.");
+            return page.Frames.FirstOrDefault();
         }
     }
 }

@@ -4,11 +4,13 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>33650170-fdc9-44a9-93e3-6d28125eb9d1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.36.1" />
     <PackageReference Include="Microsoft.TeamFoundation.DistributedTask.Common.Contracts" Version="19.225.1" />
     <PackageReference Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
